@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Ranking Oficial — Ritmo Forte</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:wght@400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        colors: {
+          flame: {
+            50:  '#fff3eb',
+            100: '#ffe1cc',
+            200: '#ffbf94',
+            300: '#ff9d5c',
+            400: '#ff7a24',
+            500: '#ff5a00',
+            600: '#e34d00',
+            700: '#b83d00',
+            800: '#7a2900',
+            900: '#3d1500',
+          },
+          ink: {
+            900: '#000000',
+            850: '#070707',
+            800: '#0c0c0c',
+            700: '#141414',
+            600: '#1c1c1c',
+            500: '#2a2a2a',
+            400: '#3a3a3a',
+          },
+        },
+        fontFamily: {
+          display: ['"Bebas Neue"', 'sans-serif'],
+          cond: ['"Barlow Condensed"', 'sans-serif'],
+          sans: ['Inter', 'system-ui', 'sans-serif'],
+          mono: ['"JetBrains Mono"', 'monospace'],
+        },
+      },
+    },
+  };
+</script>
+<style>
+  html { scroll-behavior: smooth; }
+  body {
+    background: #000;
+    color: #fff;
+    font-family: 'Inter', sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+  ::-webkit-scrollbar { width: 8px; height: 8px; }
+  ::-webkit-scrollbar-track { background: #050505; }
+  ::-webkit-scrollbar-thumb {
+    background: linear-gradient(180deg, #ff5a00 0%, #b83d00 100%);
+    border: 2px solid #050505;
+    border-radius: 999px;
+  }
+  ::-webkit-scrollbar-thumb:hover { background: linear-gradient(180deg, #ff7a24 0%, #e34d00 100%); }
+
+  .section-title {
+    font-family: 'Bebas Neue', sans-serif;
+    letter-spacing: .08em;
+  }
+  .input-base {
+    background: #141414; border: 1px solid #2a2a2a; color: #fff;
+    border-radius: 8px; padding: .5rem .75rem; outline: none;
+    transition: border-color .2s;
+  }
+  .input-base:focus { border-color: #ff5a00; }
+  .input-base::placeholder { color: #555; }
+
+  /* ─── Ranking ────────────────────────────────────────────────────── */
+  .seg {
+    display: inline-flex; background: #0c0c0c; border: 1px solid #1c1c1c;
+    border-radius: 10px; padding: 4px; gap: 4px;
+  }
+  .seg-btn {
+    padding: .5rem 1.25rem; border-radius: 7px; border: none; cursor: pointer;
+    background: transparent; color: #888; font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 600; font-size: .95rem; letter-spacing: .03em; text-transform: uppercase;
+    transition: all .2s;
+  }
+  .seg-btn:hover { color: #fff; }
+  .seg-btn.active { background: #ff5a00; color: #fff; box-shadow: 0 4px 14px -4px rgba(255,90,0,.6); }
+  @media (max-width: 767px) { .seg-full { width: 100%; } .seg-full .seg-btn { flex: 1; } }
+
+  .filter-btn {
+    padding: .35rem .85rem; border-radius: 6px;
+    font-size: .8rem; font-weight: 500; cursor: pointer;
+    border: 1px solid #2a2a2a; background: transparent; color: #aaa;
+    transition: all .15s;
+  }
+  .filter-btn.active, .filter-btn:hover {
+    border-color: #ff5a00; color: #ff5a00;
+    background: rgba(255,90,0,.08);
+  }
+
+  .podium { display: grid; grid-template-columns: 1fr 1.15fr 1fr; gap: .75rem; align-items: end; }
+  @media (max-width: 640px) { .podium { grid-template-columns: 1fr; align-items: stretch; } }
+  .podium-card {
+    position: relative; border-radius: 14px; padding: 1.25rem 1rem; text-align: center;
+    border: 1px solid; overflow: hidden;
+    animation: podiumRise .5s cubic-bezier(.16,1,.3,1) backwards;
+  }
+  @keyframes podiumRise { from { opacity:0; transform: translateY(16px); } to { opacity:1; transform: translateY(0); } }
+  .podium-1 { background: linear-gradient(180deg, rgba(251,191,36,.14), rgba(251,191,36,.03)); border-color: rgba(251,191,36,.4); padding-top: 1.75rem; padding-bottom: 1.75rem; }
+  .podium-2 { background: linear-gradient(180deg, rgba(148,163,184,.12), rgba(148,163,184,.02)); border-color: rgba(148,163,184,.35); }
+  .podium-3 { background: linear-gradient(180deg, rgba(205,124,47,.12), rgba(205,124,47,.02)); border-color: rgba(205,124,47,.35); }
+  .podium-medal { font-size: 2rem; line-height: 1; margin-bottom: .5rem; }
+  .podium-name  { font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 1.05rem; color: #fff; line-height: 1.15; margin-bottom: .15rem; }
+  .podium-sub   { font-size: .7rem; color: #888; margin-bottom: .6rem; }
+  .podium-time  { font-family: 'JetBrains Mono', monospace; font-weight: 700; font-size: 1.35rem; }
+  .podium-1 .podium-time { color: #fbbf24; }
+  .podium-2 .podium-time { color: #cbd5e1; }
+  .podium-3 .podium-time { color: #e0a06a; }
+
+  .lb-row {
+    display: flex; align-items: center; gap: 1rem; padding: .85rem 1.1rem;
+    border-bottom: 1px solid #141414; transition: background .15s;
+  }
+  .lb-row:last-child { border-bottom: none; }
+  .lb-row:hover { background: rgba(255,90,0,.04); }
+  .lb-pos {
+    width: 34px; height: 34px; flex-shrink: 0; border-radius: 9px;
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'JetBrains Mono', monospace; font-weight: 700; font-size: .85rem;
+    background: #141414; color: #777; border: 1px solid #222;
+  }
+  .lb-name { flex: 1; min-width: 0; }
+  .lb-name b { color: #fff; font-weight: 600; font-size: .92rem; display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .lb-name span { color: #666; font-size: .72rem; }
+  .lb-time { font-family: 'JetBrains Mono', monospace; font-weight: 700; font-size: 1.05rem; color: #ff5a00; flex-shrink: 0; }
+
+  /* ─── Custom Select ─────────────────────────────────────────────── */
+  .cselect { position: relative; width: 100%; user-select: none; }
+  .cselect-trigger {
+    width: 100%; background: #141414; border: 1px solid #2a2a2a; color: #fff;
+    border-radius: 8px; padding: 9px 14px; cursor: pointer;
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 8px; transition: border-color .2s;
+    font-family: 'Inter', sans-serif; font-size: .875rem;
+  }
+  .cselect-trigger:hover, .cselect.open .cselect-trigger { border-color: #ff5a00; }
+  .cselect-trigger .placeholder { color: rgba(255,255,255,.35); }
+  .cselect-trigger .selected    { color: #fff; }
+  .cselect-arrow { width:16px; height:16px; flex-shrink:0; color:rgba(255,255,255,.4); transition: transform .2s; }
+  .cselect.open .cselect-arrow { transform: rotate(180deg); }
+  .cselect-dropdown {
+    position: absolute; top: calc(100% + 6px); left: 0; right: 0;
+    background: #0e0e0e; border: 1px solid rgba(255,90,0,.3); border-radius: 12px;
+    z-index: 500; box-shadow: 0 16px 48px -8px rgba(0,0,0,.8);
+    opacity: 0; transform: translateY(-6px) scale(.98); pointer-events: none;
+    transition: opacity .2s, transform .2s cubic-bezier(.16,1,.3,1);
+    max-height: 280px; overflow-y: auto;
+  }
+  .cselect.open .cselect-dropdown { opacity: 1; transform: translateY(0) scale(1); pointer-events: all; }
+  .cselect-option {
+    padding: 10px 14px; cursor: pointer;
+    font-family: 'Inter', sans-serif; font-size: .875rem; color: rgba(255,255,255,.7);
+    border-bottom: 1px solid rgba(255,255,255,.04);
+    transition: background .15s, color .15s;
+    display: flex; align-items: center; justify-content: space-between; gap: 8px;
+  }
+  .cselect-option:last-child { border-bottom: none; }
+  .cselect-option:hover { background: rgba(255,90,0,.08); color: #fff; }
+  .cselect-option.active { background: rgba(255,90,0,.12); color: #ff7a24; font-weight: 600; }
+  .cselect-option .check { color: #ff5a00; opacity: 0; transition: opacity .15s; width:14px; height:14px; flex-shrink:0; }
+  .cselect-option.active .check { opacity: 1; }
+
+  /* ─── Spinner ────────────────────────────────────────────────────── */
+  @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+  .spinner { animation: spin 0.8s linear infinite; }
+</style>
+</head>
+<body class="min-h-screen">
+
+<!-- ═══════════════════════════════════════════════════════ HEADER -->
+<header style="background:#0a0a0a;border-bottom:1px solid #1c1c1c;padding:.9rem 1.5rem" class="flex items-center justify-between sticky top-0 z-50">
+  <div class="flex items-center gap-3 min-w-0">
+    <a href="index.html">
+      <img src="assets/ritmo-forte-logo.jpeg" alt="Ritmo Forte" class="w-9 h-9 rounded-lg object-cover" onerror="this.style.display='none'" />
+    </a>
+    <div class="min-w-0">
+      <span class="section-title text-xl text-white tracking-wider">RITMO FORTE</span>
+      <span class="font-mono text-xs text-flame-500 ml-2">ranking</span>
+    </div>
+  </div>
+  <div class="flex items-center gap-3 shrink-0">
+    <span id="last-update" class="font-mono text-xs text-gray-600 hidden sm:block">Aguardando...</span>
+    <button onclick="manualRefresh()" id="refreshBtn"
+      style="background:rgba(255,90,0,.1);border:1px solid rgba(255,90,0,.25);color:#ff5a00;padding:.4rem .75rem;border-radius:8px;font-size:.8rem;font-weight:500;cursor:pointer;transition:all .2s;display:inline-flex;align-items:center;gap:.35rem"
+      onmouseover="this.style.background='rgba(255,90,0,.2)'" onmouseout="this.style.background='rgba(255,90,0,.1)'">
+      <i data-lucide="refresh-cw" id="refresh-icon" style="width:14px;height:14px"></i>
+      <span class="hidden sm:inline">Atualizar</span>
+    </button>
+    <a href="index.html"
+      style="background:transparent;border:1px solid #2a2a2a;color:#aaa;padding:.4rem .75rem;border-radius:8px;font-size:.8rem;font-weight:500;cursor:pointer;transition:all .2s;display:inline-flex;align-items:center;gap:.35rem"
+      onmouseover="this.style.borderColor='#ff5a00';this.style.color='#ff5a00'" onmouseout="this.style.borderColor='#2a2a2a';this.style.color='#aaa'">
+      <i data-lucide="arrow-left" style="width:14px;height:14px"></i>
+      <span class="hidden sm:inline">Voltar</span>
+    </a>
+  </div>
+</header>
+
+<!-- ═══════════════════════════════════════════════════════ MAIN -->
+<main class="max-w-5xl mx-auto px-4 sm:px-6 py-8">
+
+  <!-- LOADING -->
+  <div id="state-loading" class="flex flex-col items-center justify-center py-24 gap-4">
+    <svg class="spinner w-10 h-10" style="color:#ff5a00" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+      <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+      <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"></path>
+    </svg>
+    <p class="font-cond text-gray-500 text-lg tracking-wide" style="font-family:'Barlow Condensed',sans-serif">Carregando resultados...</p>
+  </div>
+
+  <!-- ERROR -->
+  <div id="state-error" class="hidden flex-col items-center justify-center py-24 gap-4 text-center">
+    <i data-lucide="wifi-off" class="w-12 h-12 text-red-400"></i>
+    <p class="section-title text-2xl text-white">Erro ao carregar dados</p>
+    <p class="text-gray-500 text-sm max-w-sm" id="error-msg">Verifique sua conexão e tente novamente.</p>
+    <button onclick="manualRefresh()" style="background:#ff5a00;color:#fff;font-weight:600;padding:.5rem 1.5rem;border-radius:8px;border:none;cursor:pointer;margin-top:.5rem">
+      Tentar novamente
+    </button>
+  </div>
+
+  <!-- EMPTY -->
+  <div id="state-empty" class="hidden flex-col items-center justify-center py-24 gap-5 text-center">
+    <i data-lucide="timer" style="width:56px;height:56px;color:rgba(255,90,0,.5)"></i>
+    <div>
+      <p class="section-title text-3xl text-white tracking-wide">Resultados em breve</p>
+      <p style="font-family:'Barlow Condensed',sans-serif;color:rgba(255,255,255,.5);font-size:1.1rem;margin-top:.25rem">Os resultados serão publicados após o evento.</p>
+    </div>
+    <div class="flex items-center gap-2 text-gray-600 text-sm">
+      <i data-lucide="calendar" style="width:16px;height:16px"></i>
+      <span>16 de Junho de 2026</span>
+    </div>
+  </div>
+
+  <!-- RESULTS -->
+  <div id="state-results" class="hidden">
+
+    <!-- toolbar -->
+    <div class="flex flex-col md:flex-row md:items-center justify-between gap-3 mb-6">
+      <div class="seg seg-full">
+        <button class="seg-btn active" data-cat="Feminino"  onclick="setCat('Feminino',this)">Feminino</button>
+        <button class="seg-btn"        data-cat="Masculino" onclick="setCat('Masculino',this)">Masculino</button>
+      </div>
+      <div class="flex gap-2 flex-1 md:max-w-xs">
+        <div class="cselect flex-1" id="cs-athlete">
+          <div class="cselect-trigger" onclick="toggleAthleteSelect()">
+            <span id="cs-athlete-label" class="placeholder">Todos os atletas</span>
+            <svg class="cselect-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="cselect-dropdown" id="cs-athlete-dropdown"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- filtro por bateria -->
+    <div id="heatChips" class="flex gap-2 flex-wrap mb-6"></div>
+
+    <!-- pódio -->
+    <div id="podium" class="mb-7"></div>
+
+    <!-- leaderboard -->
+    <div class="flex items-center justify-between mb-2 px-1">
+      <span id="listTitle" class="font-mono text-[10px] uppercase tracking-[0.25em] text-gray-500">Classificação geral</span>
+      <span id="rankCount" class="font-mono text-[10px] text-gray-600"></span>
+    </div>
+    <div id="leaderboard" style="background:#0c0c0c;border:1px solid #1c1c1c;border-radius:14px;overflow:hidden"></div>
+
+  </div>
+
+</main>
+
+<!-- FOOTER -->
+<footer style="border-top:1px solid #1c1c1c;margin-top:4rem;padding:1.5rem 0">
+  <p class="text-center font-mono text-xs text-gray-700 tracking-widest">RITMO FORTE · UNICESUMAR CURITIBA · 2026</p>
+</footer>
+
+<!-- ═══════════════════════════════════════════════════════ SCRIPT -->
+<script>
+const SUPABASE_URL = 'https://mgioptzpohfhpvxlbmua.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_RbDxyeNyjJBt3OXCAuUOzA_NoRxkzUl';
+const db = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+let isLoading    = false;
+let allRows      = [];
+let currentCat   = 'Feminino';
+let currentHeat  = 'geral';
+let selectedAthlete = null; // athlete id or null = todos
+
+// ── Helpers ──────────────────────────────────────────────────────
+function escHtml(str) {
+  if (!str) return '';
+  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#039;');
+}
+
+function formatTempo(ms) {
+  if (!ms && ms !== 0) return '–';
+  const totalSeconds = ms / 1000;
+  const secs = Math.floor(totalSeconds);
+  const cents = Math.round((totalSeconds - secs) * 100);
+  return `${secs}.${String(cents).padStart(2, '0')}s`;
+}
+
+function catOf(r) {
+  const g = (r.athlete?.genero || '').toLowerCase();
+  if (g.includes('fem')) return 'Feminino';
+  if (g.includes('masc') || g === 'm') return 'Masculino';
+  const c = (r.heat?.categoria || '').toLowerCase();
+  if (c.includes('fem')) return 'Feminino';
+  return 'Masculino';
+}
+
+function highlight(text, term) {
+  const i = text.toLowerCase().indexOf(term);
+  if (i < 0) return escHtml(text);
+  return escHtml(text.slice(0, i)) +
+    '<mark style="background:rgba(255,90,0,.3);color:#fff;border-radius:3px;padding:0 2px">' +
+    escHtml(text.slice(i, i + term.length)) + '</mark>' +
+    escHtml(text.slice(i + term.length));
+}
+
+function setState(name) {
+  ['loading','error','empty','results'].forEach(s => {
+    const el = document.getElementById('state-' + s);
+    if (!el) return;
+    if (s === name) { el.classList.remove('hidden'); el.style.display = (s === 'loading' || s === 'empty' || s === 'error') ? 'flex' : 'block'; }
+    else { el.classList.add('hidden'); el.style.display = 'none'; }
+  });
+}
+
+function updateTimestamp() {
+  const el = document.getElementById('last-update');
+  if (!el) return;
+  const now = new Date();
+  el.textContent = `Atualizado às ${now.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}`;
+  el.classList.remove('hidden');
+}
+
+// ── Load ─────────────────────────────────────────────────────────
+async function loadRanking() {
+  if (isLoading) return;
+  isLoading = true;
+
+  const icon = document.getElementById('refresh-icon');
+  if (icon) icon.classList.add('spinner');
+
+  try {
+    const { data, error } = await db
+      .from('heat_athletes')
+      .select('raia, tempo, tempo_ms, posicao, athlete:athletes(id, nome, curso, genero), heat:heats(id, nome, categoria, numero)')
+      .not('tempo_ms', 'is', null)
+      .order('tempo_ms', { ascending: true });
+
+    if (error) throw error;
+
+    updateTimestamp();
+
+    if (!data || data.length === 0) {
+      setState('empty');
+      lucide.createIcons();
+      return;
+    }
+
+    const fem  = data.filter(r => catOf(r) === 'Feminino').sort((a,b) => a.tempo_ms - b.tempo_ms);
+    const masc = data.filter(r => catOf(r) === 'Masculino').sort((a,b) => a.tempo_ms - b.tempo_ms);
+    fem.forEach((r,i)  => r._pos = i + 1);
+    masc.forEach((r,i) => r._pos = i + 1);
+    allRows = [...fem, ...masc];
+
+    setState('results');
+    render();
+    lucide.createIcons();
+  } catch (err) {
+    console.error(err);
+    const msgEl = document.getElementById('error-msg');
+    if (msgEl) msgEl.textContent = err.message || 'Verifique sua conexão e tente novamente.';
+    setState('error');
+    lucide.createIcons();
+  } finally {
+    isLoading = false;
+    const icon = document.getElementById('refresh-icon');
+    if (icon) icon.classList.remove('spinner');
+  }
+}
+
+// ── Athlete select ────────────────────────────────────────────────
+function toggleAthleteSelect() {
+  const cs = document.getElementById('cs-athlete');
+  cs.classList.toggle('open');
+}
+
+function selectAthlete(id, nome) {
+  selectedAthlete = id;
+  const lbl = document.getElementById('cs-athlete-label');
+  lbl.textContent = nome || 'Todos os atletas';
+  lbl.className = id ? 'selected' : 'placeholder';
+  document.querySelectorAll('#cs-athlete-dropdown .cselect-option').forEach(o => {
+    o.classList.toggle('active', o.dataset.value === (id || ''));
+  });
+  document.getElementById('cs-athlete').classList.remove('open');
+  render();
+}
+
+function populateAthleteSelect(catRows) {
+  const dropdown = document.getElementById('cs-athlete-dropdown');
+  const seen = new Map();
+  catRows.forEach(r => {
+    const id = r.athlete?.id;
+    const nome = r.athlete?.nome;
+    if (id && nome && !seen.has(id)) seen.set(id, nome);
+  });
+  const athletes = [...seen.entries()].sort((a, b) => a[1].localeCompare(b[1]));
+
+  dropdown.innerHTML =
+    `<div class="cselect-option ${!selectedAthlete ? 'active' : ''}" data-value="" onclick="selectAthlete(null,'')">
+      <span>Todos os atletas</span>
+      <svg class="check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+    </div>` +
+    athletes.map(([id, nome]) =>
+      `<div class="cselect-option ${selectedAthlete === id ? 'active' : ''}" data-value="${id}" onclick="selectAthlete('${id}','${escHtml(nome)}')">
+        <span>${escHtml(nome)}</span>
+        <svg class="check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+      </div>`
+    ).join('');
+}
+
+// ── Category toggle ───────────────────────────────────────────────
+function setCat(cat, el) {
+  currentCat      = cat;
+  currentHeat     = 'geral';
+  selectedAthlete = null;
+  document.querySelectorAll('[data-cat]').forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+  const lbl = document.getElementById('cs-athlete-label');
+  if (lbl) { lbl.textContent = 'Todos os atletas'; lbl.className = 'placeholder'; }
+  render();
+}
+
+function setHeat(heatId, el) {
+  currentHeat = heatId;
+  document.querySelectorAll('[data-rh]').forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+  render();
+}
+
+function renderHeatChips(catRows) {
+  const el = document.getElementById('heatChips');
+  const heats = [...new Map(catRows.map(r => [r.heat?.id, r.heat])).values()].filter(Boolean);
+  heats.sort((a, b) => (a.numero ?? 0) - (b.numero ?? 0));
+  el.innerHTML =
+    `<button class="filter-btn ${currentHeat==='geral'?'active':''}" data-rh="geral" onclick="setHeat('geral',this)">Classificação geral</button>` +
+    heats.map(h => `<button class="filter-btn ${currentHeat===h.id?'active':''}" data-rh="${h.id}" onclick="setHeat('${h.id}',this)">${escHtml(h.nome)}</button>`).join('');
+}
+
+// ── Render ────────────────────────────────────────────────────────
+function render() {
+  const podiumEl = document.getElementById('podium');
+  const listEl   = document.getElementById('leaderboard');
+  const countEl  = document.getElementById('rankCount');
+  const titleEl  = document.getElementById('listTitle');
+
+  const catRows = allRows.filter(r => catOf(r) === currentCat);
+
+  if (!catRows.length) {
+    document.getElementById('heatChips').innerHTML = '';
+    podiumEl.innerHTML = '';
+    listEl.innerHTML = `<div style="padding:3rem 1rem;text-align:center;color:#444">
+      <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" style="margin:0 auto 12px;display:block;color:#333"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2 2"/><path d="M5 3 2 6"/><path d="m22 6-3-3"/></svg>
+      Nenhum tempo registrado para ${currentCat.toLowerCase()} ainda.
+    </div>`;
+    countEl.textContent = '';
+    return;
+  }
+
+  populateAthleteSelect(catRows);
+  renderHeatChips(catRows);
+
+  const isGeral = currentHeat === 'geral';
+  const viewRows = isGeral
+    ? catRows
+    : catRows.filter(r => r.heat?.id === currentHeat).map((r, i) => ({ ...r, _pos: i + 1 }));
+
+  podiumEl.innerHTML = renderPodium(viewRows.slice(0, 3));
+  titleEl.textContent = isGeral ? 'Classificação geral' : (viewRows[0]?.heat?.nome || 'Bateria');
+
+  const rows = selectedAthlete ? viewRows.filter(r => r.athlete?.id === selectedAthlete) : viewRows;
+
+  if (!rows.length) {
+    listEl.innerHTML = `<div style="padding:2rem 1rem;text-align:center;color:#666">Nenhum resultado encontrado.</div>`;
+  } else {
+    listEl.innerHTML = rows.map(r => {
+      const pos = r._pos;
+      const posInner = pos === 1 ? '🥇' : pos === 2 ? '🥈' : pos === 3 ? '🥉' : pos + 'º';
+      const posStyle = pos <= 3 ? 'background:transparent;border-color:transparent;font-size:1.1rem' : '';
+      const sub = isGeral
+        ? `${escHtml(r.heat?.nome || '—')} · Raia ${r.raia}`
+        : `Raia ${r.raia}`;
+      return `<div class="lb-row">
+        <div class="lb-pos" style="${posStyle}">${posInner}</div>
+        <div class="lb-name">
+          <b>${escHtml(r.athlete?.nome || '—')}</b>
+          <span>${sub}</span>
+        </div>
+        <div class="lb-time">${formatTempo(r.tempo_ms)}</div>
+      </div>`;
+    }).join('');
+  }
+
+  countEl.textContent = `${viewRows.length} atleta${viewRows.length !== 1 ? 's' : ''}`;
+  lucide.createIcons();
+}
+
+function renderPodium(top3) {
+  if (!top3.length) return '';
+
+  const card = (r, delay) => {
+    const medal = r._pos === 1 ? '🥇' : r._pos === 2 ? '🥈' : '🥉';
+    return `<div class="podium-card podium-${r._pos}" style="animation-delay:${delay}s">
+      <div class="podium-medal">${medal}</div>
+      <div class="podium-name">${escHtml(r.athlete?.nome || '—')}</div>
+      <div class="podium-sub">${escHtml(r.heat?.nome || '')} · Raia ${r.raia}</div>
+      <div class="podium-time">${formatTempo(r.tempo_ms)}</div>
+    </div>`;
+  };
+
+  if (top3.length < 3) {
+    return `<div style="display:grid;grid-template-columns:repeat(${Math.max(top3.length,1)},1fr);gap:.75rem">` +
+      top3.map(r => card(r, 0)).join('') + `</div>`;
+  }
+  // ordem visual: 2º, 1º, 3º
+  const [first, second, third] = top3;
+  return `<div class="podium">${card(second, .05)}${card(first, 0)}${card(third, .1)}</div>`;
+}
+
+function manualRefresh() { loadRanking(); }
+
+document.addEventListener('click', e => {
+  if (!e.target.closest('.cselect')) {
+    document.querySelectorAll('.cselect.open').forEach(s => s.classList.remove('open'));
+  }
+});
+
+document.addEventListener('DOMContentLoaded', () => {
+  lucide.createIcons();
+  loadRanking();
+  setInterval(loadRanking, 60_000);
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Regulamento Oficial — Ritmo Forte 2026</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:wght@400;600;700&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        colors: {
+          flame: {
+            400: '#ff7a24',
+            500: '#ff5a00',
+            600: '#e34d00',
+          },
+        },
+        fontFamily: {
+          display: ['"Bebas Neue"', 'sans-serif'],
+          cond:    ['"Barlow Condensed"', 'sans-serif'],
+          sans:    ['Inter', 'system-ui', 'sans-serif'],
+          mono:    ['"JetBrains Mono"', 'monospace'],
+        },
+      },
+    },
+  };
+</script>
+<style>
+  /* ── Screen styles ── */
+  html { scroll-behavior: smooth; }
+  body { background: #000; color: #fff; font-family: 'Inter', sans-serif; -webkit-font-smoothing: antialiased; }
+
+  ::selection { background: #ff5a00; color: #000; }
+
+  .chapter-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.75rem;
+    color: #ff5a00;
+    letter-spacing: 0.04em;
+    margin-bottom: 0.75rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid rgba(255,90,0,0.25);
+  }
+
+  .art { margin-top: 0.75rem; line-height: 1.7; color: rgba(255,255,255,0.82); }
+  .art-num { color: #ff7a24; font-weight: 600; }
+
+  .bullet { display: flex; align-items: flex-start; gap: 0.5rem; margin-top: 0.35rem; color: rgba(255,255,255,0.72); }
+  .bullet::before { content: ''; display: block; width: 6px; height: 6px; border-radius: 50%; background: #ff5a00; flex-shrink: 0; margin-top: 0.55em; }
+
+  .btn-print {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: #ff5a00; color: #000;
+    font-family: 'Barlow Condensed', sans-serif; font-weight: 700;
+    letter-spacing: 0.08em; text-transform: uppercase;
+    padding: 12px 24px; border-radius: 8px; border: none; cursor: pointer;
+    transition: background .2s;
+  }
+  .btn-print:hover { background: #ff7a24; }
+
+  .btn-back {
+    display: inline-flex; align-items: center; gap: 8px;
+    color: rgba(255,255,255,0.6);
+    font-family: 'Barlow Condensed', sans-serif; font-weight: 600;
+    letter-spacing: 0.08em; text-transform: uppercase;
+    padding: 12px 24px; border-radius: 8px;
+    border: 1px solid rgba(255,255,255,0.15);
+    text-decoration: none; transition: all .2s;
+  }
+  .btn-back:hover { border-color: rgba(255,90,0,0.6); color: #ff7a24; }
+
+  /* ── Entrance animations ── */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(28px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+  }
+
+  .anim-header  { animation: fadeIn  0.6s ease both; }
+  .anim-section { opacity: 0; animation: fadeUp 0.55s cubic-bezier(0.16,1,0.3,1) both; }
+
+  /* ── Print styles ── */
+  @media print {
+    * { -webkit-print-color-adjust: exact; print-color-adjust: exact; animation: none !important; opacity: 1 !important; transform: none !important; }
+
+    body {
+      background: #fff !important;
+      color: #111 !important;
+      font-family: 'Georgia', serif;
+      font-size: 11pt;
+      line-height: 1.6;
+    }
+
+    .no-print { display: none !important; }
+
+    .print-page {
+      max-width: 100% !important;
+      padding: 0 !important;
+      margin: 0 !important;
+    }
+
+    .print-header {
+      text-align: center;
+      border-bottom: 2pt solid #000;
+      padding-bottom: 12pt;
+      margin-bottom: 20pt;
+    }
+    .print-header .logo-text {
+      font-size: 22pt;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+    .print-header .subtitle {
+      font-size: 11pt;
+      margin-top: 4pt;
+      color: #333 !important;
+    }
+    .print-header .meta {
+      font-size: 9pt;
+      color: #555 !important;
+      margin-top: 6pt;
+    }
+
+    .chapter-title {
+      font-family: 'Arial', sans-serif !important;
+      font-size: 11pt !important;
+      font-weight: 700 !important;
+      color: #000 !important;
+      text-transform: uppercase;
+      border-bottom: 0.5pt solid #999 !important;
+      padding-bottom: 3pt !important;
+      margin-top: 16pt !important;
+      margin-bottom: 6pt !important;
+    }
+
+    .art {
+      color: #111 !important;
+      margin-top: 4pt !important;
+      font-size: 10.5pt;
+    }
+
+    .art-num { color: #000 !important; }
+
+    .bullet { color: #111 !important; margin-top: 2pt !important; }
+    .bullet::before { background: #333 !important; }
+
+    .award-grid {
+      display: flex !important;
+      gap: 20pt !important;
+    }
+    .award-box {
+      border: 0.5pt solid #aaa !important;
+      background: none !important;
+      padding: 8pt !important;
+      flex: 1;
+    }
+    .award-box-title { color: #000 !important; font-weight: 700; font-size: 9pt; }
+
+    .signature {
+      border-top: 0.5pt solid #999 !important;
+      margin-top: 20pt !important;
+      padding-top: 12pt !important;
+      text-align: center;
+      color: #333 !important;
+      font-size: 9.5pt;
+    }
+
+    section { page-break-inside: avoid; }
+    h2 { page-break-after: avoid; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ── TOOLBAR (screen only) ── -->
+<div class="no-print sticky top-0 z-50 bg-black/80 border-b border-white/10 backdrop-blur px-5 md:px-10 py-3 flex items-center justify-between gap-4">
+  <a href="index.html" class="btn-back">
+    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></svg>
+    Voltar ao site
+  </a>
+  <button onclick="window.print()" class="btn-print">
+    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+    Imprimir / Salvar PDF
+  </button>
+</div>
+
+<!-- ── DOCUMENT ── -->
+<div class="print-page max-w-3xl mx-auto px-5 md:px-8 py-12 md:py-16">
+
+  <!-- Header -->
+  <div class="print-header anim-header text-center mb-12 pb-8 border-b border-white/10">
+    <div class="no-print mb-4">
+      <img src="assets/ritmo-forte-logo.jpeg" alt="Ritmo Forte" class="h-16 mx-auto" />
+    </div>
+    <div class="logo-text font-display text-4xl md:text-5xl tracking-widest text-white no-print">Ritmo Forte</div>
+    <div class="subtitle font-cond text-xl md:text-2xl text-white/60 uppercase tracking-widest mt-2">Regulamento Oficial</div>
+    <div class="meta font-mono text-xs text-white/40 uppercase tracking-widest mt-3">
+      Campeonato Universitário de Corrida de Velocidade &nbsp;·&nbsp; Unicesumar Curitiba &nbsp;·&nbsp; 16 · 06 · 2026
+    </div>
+  </div>
+
+  <!-- Cap I -->
+  <section class="mb-8 anim-section" style="animation-delay:0.1s">
+    <h2 class="chapter-title">Capítulo I — Da Finalidade</h2>
+    <p class="art"><span class="art-num">Art. 1º</span> O Campeonato Universitário de Corrida de Velocidade é um evento acadêmico promovido pelos acadêmicos do curso de Educação Física da Unicesumar – Curitiba, com caráter educativo, esportivo e integrador.</p>
+    <p class="art"><span class="art-num">Art. 2º</span> O evento tem como objetivo incentivar a prática esportiva, promover a integração entre os participantes e proporcionar vivência prática dos conteúdos relacionados ao atletismo.</p>
+  </section>
+
+  <!-- Cap II -->
+  <section class="mb-8 anim-section" style="animation-delay:0.18s">
+    <h2 class="chapter-title">Capítulo II — Do Local e Data</h2>
+    <p class="art"><span class="art-num">Art. 3º</span> A competição será realizada na Quadra da Unicesumar – Curitiba/PR, em data e horário previamente divulgados pela Comissão Organizadora.</p>
+    <p class="art"><span class="art-num">Art. 4º</span> Todos os participantes deverão comparecer ao local com antecedência mínima de 30 (trinta) minutos do horário previsto para sua bateria. Atletas que não estiverem no aquecimento até 15 (quinze) minutos antes da prova perdem o direito de competir naquela bateria.</p>
+  </section>
+
+  <!-- Cap III -->
+  <section class="mb-8 anim-section" style="animation-delay:0.26s">
+    <h2 class="chapter-title">Capítulo III — Das Provas e Categorias</h2>
+    <p class="art"><span class="art-num">Art. 5º</span> O evento será composto pelas seguintes categorias:</p>
+    <div class="mt-2 ml-2">
+      <div class="bullet">100m Rasos Feminino</div>
+      <div class="bullet">100m Rasos Masculino</div>
+    </div>
+    <p class="art"><span class="art-num">Art. 6º</span> A competição será organizada em 03 (três) baterias com 04 (quatro) atletas cada, totalizando até 12 participantes por categoria.</p>
+    <p class="art"><span class="art-num">Art. 7º</span> A classificação final será definida pelo melhor tempo obtido entre todos os atletas participantes, independentemente da bateria em que competirem.</p>
+  </section>
+
+  <!-- Cap IV -->
+  <section class="mb-8 anim-section" style="animation-delay:0.34s">
+    <h2 class="chapter-title">Capítulo IV — Das Inscrições</h2>
+    <p class="art"><span class="art-num">Art. 8º</span> A inscrição será realizada mediante preenchimento da ficha de inscrição disponibilizada pela organização.</p>
+    <p class="art"><span class="art-num">Art. 9º</span> Para efetivação da inscrição será obrigatório:</p>
+    <div class="mt-2 ml-2">
+      <div class="bullet">Preenchimento completo dos dados pessoais;</div>
+      <div class="bullet">Preenchimento da anamnese simplificada;</div>
+      <div class="bullet">Aceite do Termo de Responsabilidade;</div>
+      <div class="bullet">Aceite da Autorização de Uso de Imagem;</div>
+      <div class="bullet">Aceite integral deste regulamento.</div>
+    </div>
+    <p class="art"><span class="art-num">Art. 10º</span> Ao se inscrever, o participante declara estar apto para a prática de atividade física.</p>
+  </section>
+
+  <!-- Cap V -->
+  <section class="mb-8 anim-section" style="animation-delay:0.42s">
+    <h2 class="chapter-title">Capítulo V — Da Competição</h2>
+    <p class="art"><span class="art-num">Art. 11º</span> A largada será realizada mediante comando da equipe organizadora com os comandos oficiais "às marcas — atenção — tiro".</p>
+    <p class="art"><span class="art-num">Art. 12º</span> Os atletas deverão respeitar as orientações dos organizadores durante todo o evento.</p>
+    <p class="art"><span class="art-num">Art. 13º</span> O atleta deverá percorrer integralmente o trajeto estabelecido pela organização.</p>
+    <p class="art"><span class="art-num">Art. 14º</span> Será considerada falsa largada qualquer saída antecipada antes da autorização oficial da equipe responsável pela prova.</p>
+    <p class="art"><span class="art-num">Art. 15º</span> Duas saídas falsas resultam em desclassificação automática do atleta.</p>
+  </section>
+
+  <!-- Cap VI -->
+  <section class="mb-8 anim-section" style="animation-delay:0.50s">
+    <h2 class="chapter-title">Capítulo VI — Da Conduta dos Participantes</h2>
+    <p class="art"><span class="art-num">Art. 16º</span> Todos os participantes deverão manter comportamento compatível com os princípios éticos, esportivos e institucionais da Unicesumar.</p>
+    <p class="art"><span class="art-num">Art. 17º</span> Não serão toleradas as seguintes condutas:</p>
+    <div class="mt-2 ml-2">
+      <div class="bullet">Invasão de raia ou obstrução de outro atleta durante a prova;</div>
+      <div class="bullet">Agressão física;</div>
+      <div class="bullet">Agressão verbal;</div>
+      <div class="bullet">Atitudes discriminatórias;</div>
+      <div class="bullet">Desrespeito aos organizadores, professores, voluntários ou participantes;</div>
+      <div class="bullet">Atitudes que comprometam a segurança do evento.</div>
+    </div>
+    <p class="art"><span class="art-num">Art. 18º</span> Invasão de raia, obstrução de outro atleta, condutas antidesportivas ou desrespeito à arbitragem implicam em desclassificação imediata.</p>
+  </section>
+
+  <!-- Cap VII -->
+  <section class="mb-8 anim-section" style="animation-delay:0.58s">
+    <h2 class="chapter-title">Capítulo VII — Da Segurança</h2>
+    <p class="art"><span class="art-num">Art. 19º</span> Recomenda-se que os participantes estejam em boas condições físicas para realização da prova.</p>
+    <p class="art"><span class="art-num">Art. 20º</span> É obrigatório o uso de vestimenta adequada para atividade esportiva.</p>
+    <p class="art"><span class="art-num">Art. 21º</span> Recomenda-se o uso de:</p>
+    <div class="mt-2 ml-2">
+      <div class="bullet">Tênis esportivo (obrigatório). Sapatilhas com pino são permitidas, com pinos de até 6mm;</div>
+      <div class="bullet">Roupas apropriadas para corrida;</div>
+      <div class="bullet">Garrafa de água para hidratação.</div>
+    </div>
+    <p class="art"><span class="art-num">Art. 21º §1º</span> É proibido competir descalço ou com chinelos.</p>
+    <p class="art"><span class="art-num">Art. 22º</span> A inscrição implica em declaração de aptidão física. Recomenda-se avaliação médica prévia. A organização não se responsabiliza por lesões ou problemas de saúde decorrentes de informações omitidas na anamnese.</p>
+  </section>
+
+  <!-- Cap VIII -->
+  <section class="mb-8 anim-section" style="animation-delay:0.66s">
+    <h2 class="chapter-title">Capítulo VIII — Do Kit Atleta</h2>
+    <p class="art"><span class="art-num">Art. 23º</span> Todos os participantes regularmente inscritos receberão um Kit Atleta antes do início da competição.</p>
+    <p class="art"><span class="art-num">Art. 24º</span> A composição do Kit Atleta será definida pela Comissão Organizadora.</p>
+  </section>
+
+  <!-- Cap IX -->
+  <section class="mb-8 anim-section" style="animation-delay:0.74s">
+    <h2 class="chapter-title">Capítulo IX — Da Premiação</h2>
+    <p class="art"><span class="art-num">Art. 25º</span> Serão premiados os atletas classificados em:</p>
+
+    <div class="award-grid mt-4 grid sm:grid-cols-2 gap-3">
+      <div class="award-box border border-white/10 rounded-lg p-4 bg-white/[0.02]">
+        <div class="award-box-title font-cond uppercase tracking-wider text-flame-400 text-sm mb-2">Categoria Feminina</div>
+        <div class="text-white/70 text-sm space-y-1">
+          <div>🥇 1º Lugar</div>
+          <div>🥈 2º Lugar</div>
+          <div>🥉 3º Lugar</div>
+        </div>
+      </div>
+      <div class="award-box border border-white/10 rounded-lg p-4 bg-white/[0.02]">
+        <div class="award-box-title font-cond uppercase tracking-wider text-flame-400 text-sm mb-2">Categoria Masculina</div>
+        <div class="text-white/70 text-sm space-y-1">
+          <div>🥇 1º Lugar</div>
+          <div>🥈 2º Lugar</div>
+          <div>🥉 3º Lugar</div>
+        </div>
+      </div>
+    </div>
+
+    <p class="art"><span class="art-num">Art. 26º</span> Os atletas classificados em 1º, 2º e 3º lugares receberão:</p>
+    <div class="mt-2 ml-2">
+      <div class="bullet">Cesta personalizada;</div>
+      <div class="bullet">Medalha de classificação;</div>
+      <div class="bullet">Certificado de classificação com menção à colocação obtida.</div>
+    </div>
+    <p class="art"><span class="art-num">Art. 27º</span> Todos os participantes receberão certificado de participação no evento.</p>
+    <p class="art"><span class="art-num">Art. 28º</span> Os certificados dos atletas classificados conterão a indicação da colocação obtida.</p>
+    <p class="art"><span class="art-num">Art. 29º</span> A premiação será realizada ao final da competição em cerimônia organizada pela Comissão Organizadora.</p>
+  </section>
+
+  <!-- Cap X -->
+  <section class="mb-8 anim-section" style="animation-delay:0.82s">
+    <h2 class="chapter-title">Capítulo X — Do Uso de Imagem</h2>
+    <p class="art"><span class="art-num">Art. 30º</span> Ao realizar sua inscrição, o participante autoriza, gratuitamente e por prazo indeterminado, o uso de sua imagem, voz e nome em fotografias, vídeos e demais registros produzidos durante o evento.</p>
+    <p class="art"><span class="art-num">Art. 31º</span> Os registros poderão ser utilizados para fins:</p>
+    <div class="mt-2 ml-2">
+      <div class="bullet">Acadêmicos;</div>
+      <div class="bullet">Institucionais;</div>
+      <div class="bullet">Educacionais;</div>
+      <div class="bullet">Promocionais;</div>
+      <div class="bullet">Divulgação em mídias impressas e digitais.</div>
+    </div>
+  </section>
+
+  <!-- Cap XI -->
+  <section class="mb-8 anim-section" style="animation-delay:0.90s">
+    <h2 class="chapter-title">Capítulo XI — Das Disposições Finais</h2>
+    <p class="art"><span class="art-num">Art. 32º</span> Todos os participantes deverão respeitar o Código de Conduta Institucional da Unicesumar.</p>
+    <p class="art"><span class="art-num">Art. 33º</span> Casos omissos neste regulamento serão analisados e decididos pela Comissão Organizadora.</p>
+    <p class="art"><span class="art-num">Art. 34º</span> As decisões da Comissão Organizadora terão caráter definitivo para fins da competição.</p>
+    <p class="art"><span class="art-num">Art. 35º</span> A participação no evento implica na aceitação integral deste regulamento.</p>
+  </section>
+
+  <!-- Assinatura -->
+  <div class="signature anim-section mt-12 pt-8 border-t border-white/10 text-center space-y-1" style="animation-delay:0.98s">
+    <div class="font-display text-2xl text-flame-500 no-print">Comissão Organizadora</div>
+    <div class="font-mono text-xs uppercase tracking-widest text-white/50 no-print">Comissão Organizadora</div>
+    <div class="font-cond text-base text-white/60 uppercase tracking-wider">Curso de Educação Física – Unicesumar Curitiba</div>
+    <div class="font-cond text-base text-white/60 uppercase tracking-wider">Campeonato Universitário de Corrida de Velocidade</div>
+    <div class="mt-4 font-sans italic text-white/40 text-sm">"Mais que competir, superar limites."</div>
+  </div>
+
+  <!-- Print button bottom (screen only) -->
+  <div class="no-print mt-12 flex flex-wrap items-center justify-center gap-4">
+    <a href="index.html" class="btn-back">
+      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></svg>
+      Voltar ao site
+    </a>
+    <button onclick="window.print()" class="btn-print">
+      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+      Imprimir / Salvar PDF
+    </button>
+  </div>
+
+</div>
+</body>
+</html>

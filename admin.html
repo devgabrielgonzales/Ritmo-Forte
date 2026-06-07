@@ -1,0 +1,1631 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Admin — Ritmo Forte</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:wght@400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        colors: {
+          flame: {
+            50:  '#fff3eb',
+            100: '#ffe1cc',
+            200: '#ffbf94',
+            300: '#ff9d5c',
+            400: '#ff7a24',
+            500: '#ff5a00',
+            600: '#e34d00',
+            700: '#b83d00',
+            800: '#7a2900',
+            900: '#3d1500',
+          },
+          ink: {
+            900: '#000000',
+            850: '#070707',
+            800: '#0c0c0c',
+            700: '#141414',
+            600: '#1c1c1c',
+            500: '#2a2a2a',
+            400: '#3a3a3a',
+          },
+        },
+        fontFamily: {
+          display: ['"Bebas Neue"', 'sans-serif'],
+          cond: ['"Barlow Condensed"', 'sans-serif'],
+          sans: ['Inter', 'system-ui', 'sans-serif'],
+          mono: ['"JetBrains Mono"', 'monospace'],
+        },
+      },
+    },
+  };
+</script>
+<style>
+  html { scroll-behavior: smooth; }
+  body {
+    background: #000;
+    color: #fff;
+    font-family: 'Inter', sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+  ::-webkit-scrollbar { width: 8px; height: 8px; }
+  ::-webkit-scrollbar-track { background: #050505; }
+  ::-webkit-scrollbar-thumb {
+    background: linear-gradient(180deg, #ff5a00 0%, #b83d00 100%);
+    border: 2px solid #050505;
+    border-radius: 999px;
+  }
+  ::-webkit-scrollbar-thumb:hover { background: linear-gradient(180deg, #ff7a24 0%, #e34d00 100%); }
+
+  .tab-btn { transition: all .2s; }
+  .tab-btn.active {
+    color: #ff5a00;
+    border-bottom: 2px solid #ff5a00;
+  }
+  .badge-pendente   { background: rgba(234,179,8,.15); color: #eab308; border: 1px solid rgba(234,179,8,.3); }
+  .badge-confirmado { background: rgba(34,197,94,.15); color: #22c55e; border: 1px solid rgba(34,197,94,.3); }
+  .badge-cancelado  { background: rgba(239,68,68,.15);  color: #ef4444; border: 1px solid rgba(239,68,68,.3); }
+  .badge-pendente_heat   { background: rgba(234,179,8,.15); color: #eab308; border: 1px solid rgba(234,179,8,.3); }
+  .badge-em_andamento { background: rgba(59,130,246,.15); color: #3b82f6; border: 1px solid rgba(59,130,246,.3); }
+  .badge-finalizado { background: rgba(34,197,94,.15); color: #22c55e; border: 1px solid rgba(34,197,94,.3); }
+
+  .modal-overlay {
+    position: fixed; inset: 0; background: rgba(0,0,0,.85);
+    display: flex; align-items: center; justify-content: center;
+    z-index: 1000; padding: 1rem;
+  }
+  .modal-box {
+    background: #0c0c0c; border: 1px solid #2a2a2a;
+    border-radius: 12px; width: 100%; max-width: 680px;
+    max-height: 90vh; overflow-y: auto;
+  }
+  .input-base {
+    background: #141414; border: 1px solid #2a2a2a; color: #fff;
+    border-radius: 8px; padding: .5rem .75rem; outline: none;
+    transition: border-color .2s;
+  }
+  .input-base:focus { border-color: #ff5a00; }
+  .input-base::placeholder { color: #555; }
+  .btn-primary {
+    background: #ff5a00; color: #fff; font-weight: 600;
+    padding: .5rem 1.25rem; border-radius: 8px;
+    border: none; cursor: pointer; transition: background .2s, opacity .2s;
+    display: inline-flex; align-items: center; gap: .4rem;
+  }
+  .btn-primary:hover { background: #e34d00; }
+  .btn-primary:disabled { opacity: .5; cursor: not-allowed; }
+  .btn-ghost {
+    background: transparent; color: #aaa; font-weight: 500;
+    padding: .4rem .9rem; border-radius: 8px;
+    border: 1px solid #2a2a2a; cursor: pointer; transition: all .2s;
+    display: inline-flex; align-items: center; gap: .4rem;
+  }
+  .btn-ghost:hover { border-color: #ff5a00; color: #ff5a00; }
+  .btn-danger {
+    background: rgba(239,68,68,.1); color: #ef4444;
+    border: 1px solid rgba(239,68,68,.3);
+    padding: .35rem .7rem; border-radius: 6px;
+    cursor: pointer; transition: all .2s; font-size: .8rem;
+    display: inline-flex; align-items: center; gap: .3rem;
+  }
+  .btn-danger:hover { background: rgba(239,68,68,.25); }
+  .btn-success {
+    background: rgba(34,197,94,.1); color: #22c55e;
+    border: 1px solid rgba(34,197,94,.3);
+    padding: .35rem .7rem; border-radius: 6px;
+    cursor: pointer; transition: all .2s; font-size: .8rem;
+    display: inline-flex; align-items: center; gap: .3rem;
+  }
+  .btn-success:hover { background: rgba(34,197,94,.25); }
+  .btn-eye {
+    background: rgba(255,90,0,.1); color: #ff5a00;
+    border: 1px solid rgba(255,90,0,.3);
+    padding: .35rem .7rem; border-radius: 6px;
+    cursor: pointer; transition: all .2s; font-size: .8rem;
+    display: inline-flex; align-items: center; gap: .3rem;
+  }
+  .btn-eye:hover { background: rgba(255,90,0,.25); }
+  .btn-delete {
+    background: transparent; color: #555;
+    border: 1px solid #2a2a2a;
+    padding: .35rem .5rem; border-radius: 6px;
+    cursor: pointer; transition: all .2s; font-size: .8rem;
+    display: inline-flex; align-items: center;
+  }
+  .btn-delete:hover { background: rgba(239,68,68,.15); color: #ef4444; border-color: rgba(239,68,68,.4); }
+  .stat-card {
+    background: #0c0c0c; border: 1px solid #1c1c1c;
+    border-radius: 12px; padding: 1.25rem 1.5rem;
+    flex: 1; min-width: 140px;
+  }
+  .heat-card {
+    background: #0c0c0c; border: 1px solid #1c1c1c;
+    border-radius: 12px; padding: 1.25rem;
+    overflow: visible;
+  }
+  .raia-slot {
+    background: #141414; border: 1px solid #2a2a2a;
+    border-radius: 8px; padding: .6rem .75rem;
+    display: flex; align-items: center; gap: .5rem;
+    min-height: 44px; overflow: visible;
+  }
+  .table-row:hover td { background: rgba(255,90,0,.04); }
+  .rank-gold   { color: #fbbf24; }
+  .rank-silver { color: #94a3b8; }
+  .rank-bronze { color: #cd7c2f; }
+  .filter-btn {
+    padding: .35rem .85rem; border-radius: 6px;
+    font-size: .8rem; font-weight: 500; cursor: pointer;
+    border: 1px solid #2a2a2a; background: transparent; color: #aaa;
+    transition: all .15s;
+  }
+  .filter-btn.active, .filter-btn:hover {
+    border-color: #ff5a00; color: #ff5a00;
+    background: rgba(255,90,0,.08);
+  }
+  .section-title {
+    font-family: 'Bebas Neue', sans-serif;
+    letter-spacing: .08em;
+  }
+
+  /* ─── Skeleton ──────────────────────────────────────────────────── */
+  @keyframes shimmer {
+    0%   { background-position: -600px 0; }
+    100% { background-position:  600px 0; }
+  }
+  .skeleton {
+    background: linear-gradient(90deg, #1c1c1c 25%, #2a2a2a 50%, #1c1c1c 75%);
+    background-size: 600px 100%;
+    animation: shimmer 1.4s ease-in-out infinite;
+    border-radius: 6px;
+  }
+
+  /* ─── Ranking ────────────────────────────────────────────────────── */
+  .seg {
+    display: inline-flex; background: #0c0c0c; border: 1px solid #1c1c1c;
+    border-radius: 10px; padding: 4px; gap: 4px;
+  }
+  .seg-btn {
+    padding: .5rem 1.25rem; border-radius: 7px; border: none; cursor: pointer;
+    background: transparent; color: #888; font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 600; font-size: .95rem; letter-spacing: .03em; text-transform: uppercase;
+    transition: all .2s;
+  }
+  .seg-btn:hover { color: #fff; }
+  .seg-btn.active { background: #ff5a00; color: #fff; box-shadow: 0 4px 14px -4px rgba(255,90,0,.6); }
+  @media (max-width: 767px) { .seg-full { width: 100%; } .seg-full .seg-btn { flex: 1; } }
+
+  .podium { display: grid; grid-template-columns: 1fr 1.15fr 1fr; gap: .75rem; align-items: end; }
+  @media (max-width: 640px) { .podium { grid-template-columns: 1fr; align-items: stretch; } }
+  .podium-card {
+    position: relative; border-radius: 14px; padding: 1.25rem 1rem; text-align: center;
+    border: 1px solid; overflow: hidden;
+    animation: podiumRise .5s cubic-bezier(.16,1,.3,1) backwards;
+  }
+  @keyframes podiumRise { from { opacity:0; transform: translateY(16px); } to { opacity:1; transform: translateY(0); } }
+  .podium-1 { background: linear-gradient(180deg, rgba(251,191,36,.14), rgba(251,191,36,.03)); border-color: rgba(251,191,36,.4); padding-top: 1.75rem; padding-bottom: 1.75rem; }
+  .podium-2 { background: linear-gradient(180deg, rgba(148,163,184,.12), rgba(148,163,184,.02)); border-color: rgba(148,163,184,.35); }
+  .podium-3 { background: linear-gradient(180deg, rgba(205,124,47,.12), rgba(205,124,47,.02)); border-color: rgba(205,124,47,.35); }
+  .podium-medal { font-size: 2rem; line-height: 1; margin-bottom: .5rem; }
+  .podium-name  { font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 1.05rem; color: #fff; line-height: 1.15; margin-bottom: .15rem; }
+  .podium-sub   { font-size: .7rem; color: #888; margin-bottom: .6rem; }
+  .podium-time  { font-family: 'JetBrains Mono', monospace; font-weight: 700; font-size: 1.35rem; }
+  .podium-1 .podium-time { color: #fbbf24; }
+  .podium-2 .podium-time { color: #cbd5e1; }
+  .podium-3 .podium-time { color: #e0a06a; }
+
+  .lb-row {
+    display: flex; align-items: center; gap: 1rem; padding: .85rem 1.1rem;
+    border-bottom: 1px solid #141414; transition: background .15s;
+  }
+  .lb-row:last-child { border-bottom: none; }
+  .lb-row:hover { background: rgba(255,90,0,.04); }
+  .lb-pos {
+    width: 34px; height: 34px; flex-shrink: 0; border-radius: 9px;
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'JetBrains Mono', monospace; font-weight: 700; font-size: .85rem;
+    background: #141414; color: #777; border: 1px solid #222;
+  }
+  .lb-name { flex: 1; min-width: 0; }
+  .lb-name b { color: #fff; font-weight: 600; font-size: .92rem; display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .lb-name span { color: #666; font-size: .72rem; }
+  .lb-time { font-family: 'JetBrains Mono', monospace; font-weight: 700; font-size: 1.05rem; color: #ff5a00; flex-shrink: 0; }
+
+  /* ─── Toast ─────────────────────────────────────────────────────── */
+  #toast-container {
+    position: fixed; top: 1.25rem; right: 1.25rem;
+    z-index: 99999; display: flex; flex-direction: column; gap: .5rem;
+    pointer-events: none;
+  }
+  .toast {
+    display: flex; align-items: flex-start; gap: .75rem;
+    padding: .875rem 1.125rem; border-radius: 10px;
+    min-width: 280px; max-width: 360px;
+    pointer-events: all;
+    font-family: 'Inter', sans-serif; font-size: .875rem; line-height: 1.4;
+    box-shadow: 0 8px 32px rgba(0,0,0,.6);
+    animation: toastIn .3s cubic-bezier(.16,1,.3,1) forwards;
+  }
+  .toast.removing { animation: toastOut .25s ease forwards; }
+  .toast-success {
+    background: #0a1f12; border: 1px solid rgba(34,197,94,.35); color: #86efac;
+  }
+  .toast-error {
+    background: #1f0a0a; border: 1px solid rgba(239,68,68,.35); color: #fca5a5;
+  }
+  .toast-icon { flex-shrink: 0; margin-top: 1px; }
+  .toast-msg  { flex: 1; }
+  .toast-close {
+    flex-shrink: 0; background: none; border: none; cursor: pointer;
+    color: inherit; opacity: .5; padding: 0; line-height: 1;
+    transition: opacity .15s;
+  }
+  .toast-close:hover { opacity: 1; }
+  @keyframes toastIn {
+    from { opacity: 0; transform: translateX(24px) scale(.97); }
+    to   { opacity: 1; transform: translateX(0)    scale(1);   }
+  }
+  @keyframes toastOut {
+    from { opacity: 1; transform: translateX(0); max-height: 120px; margin-bottom: 0; }
+    to   { opacity: 0; transform: translateX(24px); max-height: 0;   margin-bottom: -.5rem; }
+  }
+
+  @keyframes modalBackdropIn {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+  }
+  @keyframes modalPanelIn {
+    from { opacity: 0; transform: translateY(28px) scale(.96); }
+    to   { opacity: 1; transform: translateY(0)    scale(1);   }
+  }
+  .modal-backdrop-anim { animation: modalBackdropIn .25s ease forwards; }
+  .modal-panel-anim    { animation: modalPanelIn .3s cubic-bezier(.16,1,.3,1) forwards; }
+  .glow-orange-soft { box-shadow: 0 0 0 1px rgba(255,90,0,.15), 0 24px 80px -20px rgba(255,90,0,.25); }
+
+  /* ─── Custom Select ─────────────────────────────────────────────── */
+  .cselect { position: relative; width: 100%; user-select: none; }
+  .cselect-trigger {
+    width: 100%; background: #141414; border: 1px solid rgba(255,90,0,.15);
+    color: #fff; border-radius: 8px; padding: 10px 14px;
+    cursor: pointer; display: flex; align-items: center; justify-content: space-between;
+    gap: 8px; transition: border-color .2s;
+    font-family: 'Inter', sans-serif; font-size: .875rem;
+  }
+  .cselect-trigger:hover, .cselect.open .cselect-trigger { border-color: #ff5a00; }
+  .cselect-trigger .placeholder { color: rgba(255,255,255,.35); }
+  .cselect-trigger .selected    { color: #fff; }
+  .cselect-arrow { width:16px; height:16px; flex-shrink:0; color:rgba(255,255,255,.4); transition: transform .2s; }
+  .cselect.open .cselect-arrow { transform: rotate(180deg); }
+  .cselect-dropdown {
+    position: absolute; top: calc(100% + 6px); left: 0; right: 0;
+    background: #0e0e0e; border: 1px solid rgba(255,90,0,.3); border-radius: 12px;
+    overflow: hidden; z-index: 500;
+    box-shadow: 0 16px 48px -8px rgba(0,0,0,.8);
+    opacity: 0; transform: translateY(-6px) scale(.98); pointer-events: none;
+    transition: opacity .2s, transform .2s cubic-bezier(.16,1,.3,1);
+  }
+  .cselect.open .cselect-dropdown { opacity: 1; transform: translateY(0) scale(1); pointer-events: all; }
+  .cselect-option {
+    padding: 10px 14px; cursor: pointer;
+    font-family: 'Inter', sans-serif; font-size: .875rem; color: rgba(255,255,255,.7);
+    border-bottom: 1px solid rgba(255,255,255,.04);
+    transition: background .15s, color .15s;
+    display: flex; align-items: center; justify-content: space-between; gap: 8px;
+  }
+  .cselect-option:last-child { border-bottom: none; }
+  .cselect-option:hover { background: rgba(255,90,0,.08); color: #fff; }
+  .cselect-option.active { background: rgba(255,90,0,.12); color: #ff7a24; font-weight: 600; }
+  .cselect-option .check { color: #ff5a00; opacity: 0; transition: opacity .15s; width:14px; height:14px; flex-shrink:0; }
+  .cselect-option.active .check { opacity: 1; }
+  /* variante pequena para raias */
+  .cselect-sm .cselect-trigger { padding: 5px 10px; font-size: .8rem; border-radius: 6px; }
+  .cselect-sm .cselect-option   { padding: 7px 10px; font-size: .8rem; }
+  .cselect-sm .cselect-dropdown { border-radius: 8px; }
+</style>
+</head>
+<body class="min-h-screen">
+
+<!-- ═══════════════════════════════════════════════════════ LOGIN SCREEN -->
+<div id="loginScreen" class="min-h-screen flex items-center justify-center p-4">
+  <div style="width:100%;max-width:400px">
+    <!-- Logo -->
+    <div class="flex flex-col items-center mb-8">
+      <img src="assets/ritmo-forte-logo.jpeg" alt="Ritmo Forte" class="w-20 h-20 rounded-xl object-cover mb-3" onerror="this.style.display='none'" />
+      <h1 class="section-title text-3xl text-white tracking-widest">RITMO FORTE</h1>
+      <span class="font-mono text-xs text-flame-500 tracking-widest uppercase mt-1">Painel Admin</span>
+    </div>
+
+    <div style="background:#0c0c0c;border:1px solid #1c1c1c;border-radius:16px;padding:2rem">
+      <h2 class="font-cond text-xl font-semibold text-white mb-6">Acesso Administrativo</h2>
+
+      <div id="loginError" class="mb-4 p-3 rounded-lg text-sm text-red-400 hidden" style="background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.25)"></div>
+
+      <form id="loginForm" onsubmit="doLogin(event)" class="flex flex-col gap-4">
+        <div>
+          <label class="block text-xs font-medium text-gray-400 mb-1.5 uppercase tracking-wider">E-mail</label>
+          <input id="loginEmail" type="email" class="input-base w-full" placeholder="admin@ritmoforte.com" required />
+        </div>
+        <div>
+          <label class="block text-xs font-medium text-gray-400 mb-1.5 uppercase tracking-wider">Senha</label>
+          <input id="loginPassword" type="password" class="input-base w-full" placeholder="••••••••" required />
+        </div>
+        <button type="submit" id="loginBtn" class="btn-primary justify-center mt-2">
+          <i data-lucide="log-in" style="width:16px;height:16px"></i>
+          Entrar
+        </button>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════ DASHBOARD -->
+<div id="dashboard" class="hidden min-h-screen flex flex-col">
+
+  <!-- HEADER -->
+  <header style="background:#0a0a0a;border-bottom:1px solid #1c1c1c;padding:.9rem 1.5rem" class="flex items-center justify-between sticky top-0 z-50">
+    <div class="flex items-center gap-3">
+      <img src="assets/ritmo-forte-logo.jpeg" alt="Ritmo Forte" class="w-9 h-9 rounded-lg object-cover" onerror="this.style.display='none'" />
+      <div>
+        <span class="section-title text-xl text-white tracking-wider">RITMO FORTE</span>
+        <span class="font-mono text-xs text-flame-500 ml-2">admin</span>
+      </div>
+    </div>
+    <button onclick="doLogout()" class="btn-ghost text-sm">
+      <i data-lucide="log-out" style="width:15px;height:15px"></i>
+      Sair
+    </button>
+  </header>
+
+  <!-- MAIN -->
+  <main class="flex-1 p-4 md:p-6 max-w-7xl mx-auto w-full">
+
+    <!-- STATS -->
+    <div id="statsBar" class="flex flex-wrap gap-3 mb-6">
+      <div class="stat-card">
+        <div class="text-xs text-gray-500 uppercase tracking-wider mb-1 font-medium">Total inscritos</div>
+        <div id="statTotal" class="section-title text-3xl text-white">—</div>
+      </div>
+      <div class="stat-card">
+        <div class="text-xs text-gray-500 uppercase tracking-wider mb-1 font-medium">Confirmados</div>
+        <div id="statConfirmados" class="section-title text-3xl text-green-400">—</div>
+      </div>
+      <div class="stat-card">
+        <div class="text-xs text-gray-500 uppercase tracking-wider mb-1 font-medium">Feminino</div>
+        <div id="statFeminino" class="section-title text-3xl text-pink-400">—</div>
+      </div>
+      <div class="stat-card">
+        <div class="text-xs text-gray-500 uppercase tracking-wider mb-1 font-medium">Masculino</div>
+        <div id="statMasculino" class="section-title text-3xl text-blue-400">—</div>
+      </div>
+    </div>
+
+    <!-- TABS -->
+    <div style="border-bottom:1px solid #1c1c1c" class="flex gap-1 mb-6">
+      <button class="tab-btn active px-4 py-2.5 font-cond font-semibold text-sm tracking-wide" onclick="switchTab('inscritos')">Inscritos</button>
+      <button class="tab-btn px-4 py-2.5 font-cond font-semibold text-sm tracking-wide text-gray-400" onclick="switchTab('baterias')">Baterias</button>
+      <button class="tab-btn px-4 py-2.5 font-cond font-semibold text-sm tracking-wide text-gray-400" onclick="switchTab('tempos')">Tempos</button>
+      <button class="tab-btn px-4 py-2.5 font-cond font-semibold text-sm tracking-wide text-gray-400" onclick="switchTab('ranking')">Ranking</button>
+    </div>
+
+    <!-- ─── TAB: INSCRITOS ─────────────────────────────── -->
+    <div id="tab-inscritos" class="tab-content">
+      <div class="flex flex-col sm:flex-row gap-3 mb-4">
+        <input id="searchAthletes" type="text" class="input-base flex-1" placeholder="Buscar por nome..." oninput="filterAthletes()" />
+        <div class="flex flex-wrap gap-2">
+          <button class="filter-btn active" data-filter="todos" onclick="setFilter('todos',this)">Todos</button>
+          <button class="filter-btn" data-filter="Feminino" onclick="setFilter('Feminino',this)">Feminino</button>
+          <button class="filter-btn" data-filter="Masculino" onclick="setFilter('Masculino',this)">Masculino</button>
+          <button class="filter-btn" data-filter="pendente" onclick="setFilter('pendente',this)">Pendentes</button>
+          <button class="filter-btn" data-filter="confirmado" onclick="setFilter('confirmado',this)">Confirmados</button>
+          <button class="filter-btn" data-filter="cancelado" onclick="setFilter('cancelado',this)">Cancelados</button>
+        </div>
+      </div>
+      <div style="background:#0c0c0c;border:1px solid #1c1c1c;border-radius:12px;overflow:hidden">
+        <div class="overflow-x-auto">
+          <table class="w-full text-sm">
+            <thead>
+              <tr style="border-bottom:1px solid #1c1c1c">
+                <th class="text-left px-4 py-3 text-xs text-gray-500 uppercase tracking-wider font-medium w-8">#</th>
+                <th class="text-left px-4 py-3 text-xs text-gray-500 uppercase tracking-wider font-medium">Nome</th>
+                <th class="text-left px-4 py-3 text-xs text-gray-500 uppercase tracking-wider font-medium">E-mail</th>
+                <th class="text-left px-4 py-3 text-xs text-gray-500 uppercase tracking-wider font-medium w-12">Idade</th>
+                <th class="text-left px-4 py-3 text-xs text-gray-500 uppercase tracking-wider font-medium">Gênero</th>
+                <th class="text-left px-4 py-3 text-xs text-gray-500 uppercase tracking-wider font-medium">Curso</th>
+                <th class="text-left px-4 py-3 text-xs text-gray-500 uppercase tracking-wider font-medium">Inscrito em</th>
+                <th class="text-left px-4 py-3 text-xs text-gray-500 uppercase tracking-wider font-medium">Status</th>
+                <th class="text-left px-4 py-3 text-xs text-gray-500 uppercase tracking-wider font-medium">Ações</th>
+              </tr>
+            </thead>
+            <tbody id="inscritosBody">
+              <tr><td colspan="9" class="px-4 py-8 text-center text-gray-600">Carregando...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ─── TAB: BATERIAS ─────────────────────────────── -->
+    <div id="tab-baterias" class="tab-content hidden">
+      <div class="flex items-center gap-3 mb-5">
+        <button onclick="autoDistribute()" id="autoDistBtn" class="btn-primary text-sm">
+          <i data-lucide="shuffle" style="width:15px;height:15px"></i>
+          Distribuir automaticamente
+        </button>
+      </div>
+
+      <!-- skeleton -->
+      <div id="heats-skeleton" class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <!-- 6 skeleton cards -->
+        <div class="heat-card" style="display:flex;flex-direction:column;gap:.75rem">
+          <div class="skeleton" style="height:18px;width:70%"></div>
+          <div class="skeleton" style="height:44px;border-radius:8px"></div>
+          <div class="skeleton" style="height:44px;border-radius:8px"></div>
+          <div class="skeleton" style="height:44px;border-radius:8px"></div>
+          <div class="skeleton" style="height:44px;border-radius:8px"></div>
+        </div>
+        <div class="heat-card" style="display:flex;flex-direction:column;gap:.75rem">
+          <div class="skeleton" style="height:18px;width:70%"></div>
+          <div class="skeleton" style="height:44px;border-radius:8px"></div>
+          <div class="skeleton" style="height:44px;border-radius:8px"></div>
+          <div class="skeleton" style="height:44px;border-radius:8px"></div>
+          <div class="skeleton" style="height:44px;border-radius:8px"></div>
+        </div>
+        <div class="heat-card" style="display:flex;flex-direction:column;gap:.75rem">
+          <div class="skeleton" style="height:18px;width:70%"></div>
+          <div class="skeleton" style="height:44px;border-radius:8px"></div>
+          <div class="skeleton" style="height:44px;border-radius:8px"></div>
+          <div class="skeleton" style="height:44px;border-radius:8px"></div>
+          <div class="skeleton" style="height:44px;border-radius:8px"></div>
+        </div>
+        <div class="heat-card" style="display:flex;flex-direction:column;gap:.75rem">
+          <div class="skeleton" style="height:18px;width:70%"></div>
+          <div class="skeleton" style="height:44px;border-radius:8px"></div>
+          <div class="skeleton" style="height:44px;border-radius:8px"></div>
+          <div class="skeleton" style="height:44px;border-radius:8px"></div>
+          <div class="skeleton" style="height:44px;border-radius:8px"></div>
+        </div>
+        <div class="heat-card" style="display:flex;flex-direction:column;gap:.75rem">
+          <div class="skeleton" style="height:18px;width:70%"></div>
+          <div class="skeleton" style="height:44px;border-radius:8px"></div>
+          <div class="skeleton" style="height:44px;border-radius:8px"></div>
+          <div class="skeleton" style="height:44px;border-radius:8px"></div>
+          <div class="skeleton" style="height:44px;border-radius:8px"></div>
+        </div>
+        <div class="heat-card" style="display:flex;flex-direction:column;gap:.75rem">
+          <div class="skeleton" style="height:18px;width:70%"></div>
+          <div class="skeleton" style="height:44px;border-radius:8px"></div>
+          <div class="skeleton" style="height:44px;border-radius:8px"></div>
+          <div class="skeleton" style="height:44px;border-radius:8px"></div>
+          <div class="skeleton" style="height:44px;border-radius:8px"></div>
+        </div>
+      </div>
+
+      <!-- conteúdo real -->
+      <div id="heats-content" class="hidden">
+        <div class="mb-6">
+          <h2 class="section-title text-xl text-flame-500 tracking-widest mb-3">FEMININO</h2>
+          <div id="heatsGridFem" class="grid grid-cols-1 md:grid-cols-3 gap-4"></div>
+        </div>
+        <div>
+          <h2 class="section-title text-xl text-flame-500 tracking-widest mb-3">MASCULINO</h2>
+          <div id="heatsGridMasc" class="grid grid-cols-1 md:grid-cols-3 gap-4"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ─── TAB: TEMPOS ─────────────────────────────── -->
+    <div id="tab-tempos" class="tab-content hidden">
+      <div class="flex items-center gap-3 mb-5 flex-wrap">
+        <div style="min-width:260px">
+          <label class="block text-xs text-gray-500 uppercase tracking-wider mb-1 font-medium">Bateria</label>
+          <div class="cselect" id="cs-heat">
+            <div class="cselect-trigger" onclick="toggleSelect('cs-heat')">
+              <span id="cs-heat-label" class="placeholder">Selecione uma bateria…</span>
+              <svg class="cselect-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+            </div>
+            <div class="cselect-dropdown" id="cs-heat-dropdown"></div>
+          </div>
+          <input type="hidden" id="heatSelect" value="" />
+        </div>
+      </div>
+      <div id="temposTableWrap" class="hidden">
+        <div style="background:#0c0c0c;border:1px solid #1c1c1c;border-radius:12px;overflow:hidden;margin-bottom:1rem">
+          <div class="overflow-x-auto">
+            <table class="w-full text-sm">
+              <thead>
+                <tr style="border-bottom:1px solid #1c1c1c">
+                  <th class="text-left px-4 py-3 text-xs text-gray-500 uppercase tracking-wider font-medium w-16">Raia</th>
+                  <th class="text-left px-4 py-3 text-xs text-gray-500 uppercase tracking-wider font-medium">Atleta</th>
+                  <th class="text-left px-4 py-3 text-xs text-gray-500 uppercase tracking-wider font-medium w-40">Tempo (s)</th>
+                  <th class="text-left px-4 py-3 text-xs text-gray-500 uppercase tracking-wider font-medium w-24">Posição</th>
+                </tr>
+              </thead>
+              <tbody id="temposBody"></tbody>
+            </table>
+          </div>
+        </div>
+        <button onclick="saveTimes()" id="saveTimesBtn" class="btn-primary text-sm">
+          <i data-lucide="save" style="width:15px;height:15px"></i>
+          Salvar tempos
+        </button>
+      </div>
+      <div id="temposEmpty" class="text-gray-600 text-sm">Selecione uma bateria para lançar tempos.</div>
+    </div>
+
+    <!-- ─── TAB: RANKING ─────────────────────────────── -->
+    <div id="tab-ranking" class="tab-content hidden">
+
+      <!-- toolbar -->
+      <div class="flex flex-col md:flex-row md:items-center justify-between gap-3 mb-6">
+        <div class="seg seg-full">
+          <button class="seg-btn active" data-cat="Feminino"  onclick="setRankingCat('Feminino',this)">Feminino</button>
+          <button class="seg-btn"        data-cat="Masculino" onclick="setRankingCat('Masculino',this)">Masculino</button>
+        </div>
+        <div class="flex gap-2 flex-1 md:max-w-md">
+          <input id="rankingSearch" type="text" class="input-base flex-1" placeholder="Buscar atleta..." oninput="renderRanking()" />
+          <button onclick="loadRanking()" id="refreshRankingBtn" class="btn-primary text-sm">
+            <i data-lucide="refresh-cw" style="width:14px;height:14px"></i>
+          </button>
+          <a href="ranking.html" target="_blank" class="btn-ghost text-sm" title="Página pública">
+            <i data-lucide="external-link" style="width:14px;height:14px"></i>
+          </a>
+        </div>
+      </div>
+
+      <!-- filtro por bateria -->
+      <div id="rankingHeatChips" class="flex gap-2 flex-wrap mb-6"></div>
+
+      <!-- pódio -->
+      <div id="rankingPodium" class="mb-7"></div>
+
+      <!-- leaderboard -->
+      <div class="flex items-center justify-between mb-2 px-1">
+        <span id="rankingListTitle" class="font-mono text-[10px] uppercase tracking-[0.25em] text-gray-500">Classificação geral</span>
+        <span id="rankingCount" class="font-mono text-[10px] text-gray-600"></span>
+      </div>
+      <div id="rankingList" style="background:#0c0c0c;border:1px solid #1c1c1c;border-radius:14px;overflow:hidden"></div>
+    </div>
+
+  </main>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════ MODAL: ANAMNESE -->
+<div id="anamneseModal" class="modal-overlay hidden" onclick="closeAnamneseModal(event)">
+  <div class="modal-box" onclick="event.stopPropagation()">
+    <div style="padding:1.5rem;border-bottom:1px solid #1c1c1c" class="flex items-center justify-between">
+      <h2 class="font-cond text-xl font-bold text-white">Ficha do Atleta</h2>
+      <button onclick="document.getElementById('anamneseModal').classList.add('hidden')" class="btn-ghost p-1.5">
+        <i data-lucide="x" style="width:16px;height:16px"></i>
+      </button>
+    </div>
+    <div id="anamneseContent" style="padding:1.5rem"></div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════ SCRIPT -->
+<script>
+// ─── Config ────────────────────────────────────────────────────────────────
+const SUPABASE_URL = 'https://mgioptzpohfhpvxlbmua.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_RbDxyeNyjJBt3OXCAuUOzA_NoRxkzUl';
+
+let sb;
+let allAthletes = [];
+let allHeats = [];
+let heatAthletes = {}; // heatId -> [{raia, athlete_id, athlete}]
+let currentFilter = 'todos';
+let currentTimesHeatId = null;
+let currentTimesRows = []; // [{ha_id, raia, nome, tempo, tempo_ms}]
+
+// ─── Init ─────────────────────────────────────────────────────────────────
+function initSupabase() {
+  sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+}
+
+async function checkAuth() {
+  const { data: { session } } = await sb.auth.getSession();
+  if (session) {
+    showDashboard();
+  }
+}
+
+function showDashboard() {
+  document.getElementById('loginScreen').classList.add('hidden');
+  document.getElementById('dashboard').classList.remove('hidden');
+  loadStats();
+  loadAthletes();
+  lucide.createIcons();
+}
+
+// ─── Auth ─────────────────────────────────────────────────────────────────
+async function doLogin(e) {
+  e.preventDefault();
+  const email = document.getElementById('loginEmail').value.trim();
+  const password = document.getElementById('loginPassword').value;
+  const btn = document.getElementById('loginBtn');
+  const errEl = document.getElementById('loginError');
+
+  btn.disabled = true;
+  btn.innerHTML = '<i data-lucide="loader-2" style="width:16px;height:16px;animation:spin 1s linear infinite"></i> Carregando...';
+  errEl.classList.add('hidden');
+  lucide.createIcons();
+
+  const { error } = await sb.auth.signInWithPassword({ email, password });
+
+  if (error) {
+    errEl.textContent = 'E-mail ou senha inválidos. Verifique e tente novamente.';
+    errEl.classList.remove('hidden');
+    btn.disabled = false;
+    btn.innerHTML = '<i data-lucide="log-in" style="width:16px;height:16px"></i> Entrar';
+    lucide.createIcons();
+    return;
+  }
+
+  showDashboard();
+}
+
+async function doLogout() {
+  await sb.auth.signOut();
+  document.getElementById('dashboard').classList.add('hidden');
+  document.getElementById('loginScreen').classList.remove('hidden');
+  document.getElementById('loginEmail').value = '';
+  document.getElementById('loginPassword').value = '';
+  lucide.createIcons();
+}
+
+// ─── Stats ────────────────────────────────────────────────────────────────
+async function loadStats() {
+  const { data, error } = await sb.from('athletes').select('status, genero');
+  if (error || !data) return;
+
+  const total = data.length;
+  const confirmados = data.filter(a => a.status === 'confirmado').length;
+  const feminino = data.filter(a => a.genero === 'Feminino').length;
+  const masculino = data.filter(a => a.genero === 'Masculino').length;
+
+  document.getElementById('statTotal').textContent = total;
+  document.getElementById('statConfirmados').textContent = confirmados;
+  document.getElementById('statFeminino').textContent = feminino;
+  document.getElementById('statMasculino').textContent = masculino;
+}
+
+// ─── Inscritos ────────────────────────────────────────────────────────────
+async function loadAthletes() {
+  const { data, error } = await sb
+    .from('athletes')
+    .select('*')
+    .order('created_at', { ascending: true });
+
+  if (error) {
+    showToast('Erro ao carregar inscritos: ' + error.message, 'error');
+    return;
+  }
+
+  allAthletes = data || [];
+  renderAthletes();
+}
+
+function filterAthletes() {
+  renderAthletes();
+}
+
+function setFilter(filter, btn) {
+  currentFilter = filter;
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderAthletes();
+}
+
+function renderAthletes() {
+  const search = document.getElementById('searchAthletes').value.toLowerCase();
+  let list = allAthletes;
+
+  if (currentFilter === 'Feminino') list = list.filter(a => a.genero === 'Feminino');
+  else if (currentFilter === 'Masculino') list = list.filter(a => a.genero === 'Masculino');
+  else if (['pendente','confirmado','cancelado'].includes(currentFilter)) list = list.filter(a => a.status === currentFilter);
+
+  if (search) list = list.filter(a => a.nome.toLowerCase().includes(search));
+
+  const tbody = document.getElementById('inscritosBody');
+
+  if (!list.length) {
+    tbody.innerHTML = '<tr><td colspan="9" class="px-4 py-8 text-center text-gray-600">Nenhum inscrito encontrado.</td></tr>';
+    return;
+  }
+
+  tbody.innerHTML = list.map((a, i) => `
+    <tr class="table-row" style="border-bottom:1px solid #141414">
+      <td class="px-4 py-3 text-gray-500 text-xs">${i + 1}</td>
+      <td class="px-4 py-3 font-medium text-white">${escHtml(a.nome)}</td>
+      <td class="px-4 py-3 text-gray-400 text-xs">${escHtml(a.email)}</td>
+      <td class="px-4 py-3 text-gray-300">${a.idade}</td>
+      <td class="px-4 py-3 text-gray-300 text-xs">${escHtml(a.genero)}</td>
+      <td class="px-4 py-3 text-gray-400 text-xs" style="max-width:160px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="${escHtml(a.curso)}">${escHtml(a.curso)}</td>
+      <td class="px-4 py-3 text-gray-400 text-xs">${fmtDate(a.created_at)}</td>
+      <td class="px-4 py-3"><span class="badge-${a.status} px-2 py-0.5 rounded-full text-xs font-medium">${a.status}</span></td>
+      <td class="px-4 py-3">
+        <div class="flex gap-1.5 flex-wrap">
+          ${a.status !== 'confirmado' ? `<button class="btn-success" onclick="updateStatus('${a.id}','confirmado')"><i data-lucide="check" style="width:12px;height:12px"></i>Confirmar</button>` : ''}
+          ${a.status !== 'cancelado' ? `<button class="btn-danger" onclick="updateStatus('${a.id}','cancelado')"><i data-lucide="x" style="width:12px;height:12px"></i>Cancelar</button>` : ''}
+          <button class="btn-eye" onclick="showAnamneseModal(${i})"><i data-lucide="eye" style="width:12px;height:12px"></i></button>
+          <button class="btn-delete" onclick="deleteAthlete('${a.id}','${escHtml(a.nome)}')" title="Excluir inscrição"><i data-lucide="trash-2" style="width:12px;height:12px"></i></button>
+        </div>
+      </td>
+    </tr>
+  `).join('');
+
+  lucide.createIcons();
+}
+
+async function updateStatus(id, status) {
+  const { error } = await sb.from('athletes').update({ status }).eq('id', id);
+  if (error) {
+    showToast('Erro ao atualizar: ' + error.message, 'error');
+    return;
+  }
+  await loadAthletes();
+  await loadStats();
+}
+
+// ─── Toast ───────────────────────────────────────────────────────────────────
+function showToast(msg, type = 'success', duration = 4000) {
+  const container = document.getElementById('toast-container');
+  const id = 'toast-' + Date.now();
+  const iconSvg = type === 'success'
+    ? `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>`
+    : `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>`;
+  const el = document.createElement('div');
+  el.id = id;
+  el.className = `toast toast-${type}`;
+  el.innerHTML = `
+    <span class="toast-icon">${iconSvg}</span>
+    <span class="toast-msg">${msg}</span>
+    <button class="toast-close" onclick="removeToast('${id}')">
+      <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    </button>`;
+  container.appendChild(el);
+  setTimeout(() => removeToast(id), duration);
+}
+
+function removeToast(id) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.classList.add('removing');
+  el.addEventListener('animationend', () => el.remove(), { once: true });
+}
+
+// ─── Dialog ───────────────────────────────────────────────────────────────────
+let _dialogCallback = null;
+
+function showDialog(msg, type, onConfirm) {
+  const d      = document.getElementById('app-dialog');
+  const icon   = document.getElementById('app-dialog-icon');
+  const title  = document.getElementById('app-dialog-title');
+  const text   = document.getElementById('app-dialog-text');
+  const footer = document.getElementById('app-dialog-footer');
+
+  _dialogCallback = onConfirm || null;
+
+  if (type === 'success') {
+    icon.innerHTML  = '<svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#ff5a00" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>';
+    title.textContent = 'Sucesso';
+    text.textContent  = msg;
+    footer.innerHTML  = `<button onclick="closeDialog()" class="btn-primary" style="padding:.6rem 2rem">Ótimo!</button>`;
+  } else if (type === 'confirm') {
+    icon.innerHTML  = '<svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>';
+    title.textContent = 'Confirmar';
+    text.textContent  = msg;
+    footer.innerHTML  = `
+      <button onclick="closeDialog()" class="btn-ghost" style="padding:.6rem 1.5rem">Cancelar</button>
+      <button onclick="_dialogCallback && _dialogCallback(); closeDialog();" class="btn-danger" style="padding:.6rem 1.5rem;font-size:.9rem">Excluir</button>`;
+  } else {
+    icon.innerHTML  = '<svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#ff7a24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>';
+    title.textContent = 'Atenção';
+    text.textContent  = msg;
+    footer.innerHTML  = `<button onclick="closeDialog()" class="btn-primary" style="padding:.6rem 2rem">Entendido</button>`;
+  }
+
+  d.classList.remove('hidden');
+  document.body.style.overflow = 'hidden';
+  lucide.createIcons();
+}
+
+function closeDialog() {
+  document.getElementById('app-dialog').classList.add('hidden');
+  document.body.style.overflow = '';
+  _dialogCallback = null;
+}
+
+async function deleteAthlete(id, nome) {
+  showDialog(`Excluir a inscrição de "${nome}"? Esta ação não pode ser desfeita.`, 'confirm', async () => {
+    const { error } = await sb.from('athletes').delete().eq('id', id);
+    if (error) {
+      showDialog('Erro ao excluir: ' + error.message);
+      return;
+    }
+    await loadAthletes();
+    await loadStats();
+  });
+}
+
+// ─── Anamnese Modal ───────────────────────────────────────────────────────
+const ANAMNESE_PERGUNTAS = [
+  'Você tem ou já teve algum problema cardíaco?',
+  'Você sente dor no peito durante atividade física?',
+  'Você perde o equilíbrio por tontura ou já desmaiou?',
+  'Você tem algum problema ósseo ou articular?',
+  'Você toma algum medicamento?',
+  'Você tem diabetes?',
+  'Você tem pressão alta?',
+  'Você tem asma ou problema respiratório?',
+  'Você tem alguma lesão muscular recente?',
+  'Existe algum outro motivo de saúde que impeça atividade física intensa?',
+];
+
+function showAnamneseModal(idx) {
+  // idx is index in current filtered list — rebuild from allAthletes matching
+  const search = document.getElementById('searchAthletes').value.toLowerCase();
+  let list = allAthletes;
+  if (currentFilter === 'Feminino') list = list.filter(a => a.genero === 'Feminino');
+  else if (currentFilter === 'Masculino') list = list.filter(a => a.genero === 'Masculino');
+  else if (['pendente','confirmado','cancelado'].includes(currentFilter)) list = list.filter(a => a.status === currentFilter);
+  if (search) list = list.filter(a => a.nome.toLowerCase().includes(search));
+
+  const a = list[idx];
+  if (!a) return;
+
+  const anamnese = a.anamnese || {};
+  const perguntas = ANAMNESE_PERGUNTAS.map((p, i) => {
+    const key = `q${i+1}`;
+    const entry = anamnese[key];
+    // entry pode ser { pergunta, resposta } ou string direta
+    const resposta = (entry && typeof entry === 'object') ? entry.resposta : entry;
+    const val = resposta === 'Sim' ? '<span style="color:#ef4444">Sim</span>'
+              : resposta === 'Não' ? '<span style="color:#22c55e">Não</span>'
+              : '<span style="color:#888">—</span>';
+    return `<div style="display:flex;justify-content:space-between;align-items:flex-start;padding:.5rem 0;border-bottom:1px solid #1a1a1a;gap:1rem">
+      <span style="color:#ccc;font-size:.85rem;line-height:1.4">${i+1}. ${p}</span>
+      <span style="font-size:.85rem;font-weight:600;white-space:nowrap">${val}</span>
+    </div>`;
+  }).join('');
+
+  document.getElementById('anamneseContent').innerHTML = `
+    <div style="margin-bottom:1.25rem;padding-bottom:1rem;border-bottom:1px solid #1c1c1c">
+      <div style="font-size:1.2rem;font-weight:700;color:#fff;margin-bottom:.25rem">${escHtml(a.nome)}</div>
+      <div style="font-size:.85rem;color:#888;display:flex;flex-wrap:wrap;gap:.75rem">
+        <span><span style="color:#555">E-mail:</span> ${escHtml(a.email)}</span>
+        <span><span style="color:#555">Idade:</span> ${a.idade}</span>
+        <span><span style="color:#555">Gênero:</span> ${escHtml(a.genero)}</span>
+        <span><span style="color:#555">Curso:</span> ${escHtml(a.curso)}</span>
+        <span><span style="color:#555">Status:</span> <span class="badge-${a.status}" style="padding:.15rem .5rem;border-radius:999px;font-size:.75rem">${a.status}</span></span>
+      </div>
+    </div>
+
+    <div style="margin-bottom:1rem">
+      <div style="font-size:.7rem;text-transform:uppercase;letter-spacing:.1em;color:#555;font-weight:600;margin-bottom:.5rem">Anamnese — 10 perguntas</div>
+      ${perguntas}
+    </div>
+
+    ${a.anamnese_obs ? `<div style="margin-bottom:1rem;padding:.75rem;background:#141414;border-radius:8px;border:1px solid #2a2a2a">
+      <div style="font-size:.7rem;text-transform:uppercase;letter-spacing:.1em;color:#555;font-weight:600;margin-bottom:.35rem">Observações de saúde</div>
+      <p style="font-size:.875rem;color:#ccc;line-height:1.5">${escHtml(a.anamnese_obs)}</p>
+    </div>` : ''}
+
+    <div style="padding:.75rem;background:#141414;border-radius:8px;border:1px solid #2a2a2a">
+      <div style="font-size:.7rem;text-transform:uppercase;letter-spacing:.1em;color:#555;font-weight:600;margin-bottom:.5rem">Termos aceitos</div>
+      <div style="display:flex;flex-direction:column;gap:.3rem;font-size:.85rem">
+        <div style="display:flex;align-items:center;gap:.5rem">
+          ${checkIcon(a.term_responsabilidade)} <span style="color:#ccc">Termo de responsabilidade</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:.5rem">
+          ${checkIcon(a.term_imagem)} <span style="color:#ccc">Termo de uso de imagem</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:.5rem">
+          ${checkIcon(a.term_regulamento)} <span style="color:#ccc">Termo de regulamento</span>
+        </div>
+      </div>
+      ${a.assinatura_nome ? `<div style="margin-top:.75rem;font-size:.8rem;color:#666">Assinado por: <span style="color:#aaa">${escHtml(a.assinatura_nome)}</span>${a.assinatura_data ? ` em <span style="color:#aaa">${escHtml(a.assinatura_data)}</span>` : ''}</div>` : ''}
+    </div>
+  `;
+
+  document.getElementById('anamneseModal').classList.remove('hidden');
+  lucide.createIcons();
+}
+
+function closeAnamneseModal(e) {
+  if (e.target === document.getElementById('anamneseModal')) {
+    document.getElementById('anamneseModal').classList.add('hidden');
+  }
+}
+
+function checkIcon(val) {
+  return val
+    ? '<span style="color:#22c55e;width:16px;height:16px;display:inline-flex">✓</span>'
+    : '<span style="color:#ef4444;width:16px;height:16px;display:inline-flex">✗</span>';
+}
+
+// ─── Baterias ─────────────────────────────────────────────────────────────
+async function loadHeats() {
+  const { data: heatsData, error: heatsErr } = await sb
+    .from('heats')
+    .select('*')
+    .order('categoria')
+    .order('numero');
+
+  if (heatsErr) {
+    showToast('Erro ao carregar baterias: ' + heatsErr.message, 'error');
+    return;
+  }
+
+  const { data: haData, error: haErr } = await sb
+    .from('heat_athletes')
+    .select('*, athlete:athlete_id(id, nome, genero, status)')
+    .order('raia');
+
+  if (haErr) {
+    showToast('Erro ao carregar atletas das baterias: ' + haErr.message, 'error');
+    return;
+  }
+
+  allHeats = heatsData || [];
+
+  // group by heat_id
+  heatAthletes = {};
+  (haData || []).forEach(ha => {
+    if (!heatAthletes[ha.heat_id]) heatAthletes[ha.heat_id] = [];
+    heatAthletes[ha.heat_id].push(ha);
+  });
+
+  // popula custom select de baterias (tab Tempos)
+  const prevVal = document.getElementById('heatSelect').value;
+  const dropdown = document.getElementById('cs-heat-dropdown');
+  dropdown.innerHTML = allHeats.map(h => `
+    <div class="cselect-option" data-value="${h.id}" data-label="${escHtml(h.nome)}" onclick="selectHeatOption(this)">
+      ${escHtml(h.nome)}
+      <svg class="check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+    </div>`).join('');
+  if (prevVal) {
+    const h = allHeats.find(x => x.id === prevVal);
+    if (h) selectHeat(h.id, h.nome, true);
+  }
+
+  renderHeats();
+}
+
+function renderHeats() {
+  const fem = allHeats.filter(h => h.categoria === 'Feminino');
+  const masc = allHeats.filter(h => h.categoria === 'Masculino');
+  document.getElementById('heatsGridFem').innerHTML = fem.map(h => renderHeatCard(h)).join('');
+  document.getElementById('heatsGridMasc').innerHTML = masc.map(h => renderHeatCard(h)).join('');
+  document.getElementById('heats-skeleton').classList.add('hidden');
+  document.getElementById('heats-content').classList.remove('hidden');
+  lucide.createIcons();
+}
+
+function getAssignedAthleteIds() {
+  const ids = new Set();
+  Object.values(heatAthletes).forEach(list => {
+    list.forEach(ha => ids.add(ha.athlete_id));
+  });
+  return ids;
+}
+
+function renderHeatCard(heat) {
+  const slots = heatAthletes[heat.id] || [];
+  const assignedGlobally = getAssignedAthleteIds();
+
+  const availableAthletes = allAthletes.filter(a =>
+    a.status === 'confirmado' &&
+    a.genero === heat.categoria &&
+    !assignedGlobally.has(a.id)
+  );
+
+  const statusBadge = {
+    pendente: 'badge-pendente_heat',
+    em_andamento: 'badge-em_andamento',
+    finalizado: 'badge-finalizado',
+  }[heat.status] || 'badge-pendente_heat';
+
+  const raias = [1, 2, 3, 4].map(raia => {
+    const ha = slots.find(s => s.raia === raia);
+    if (ha && ha.athlete) {
+      return `<div class="raia-slot" style="justify-content:space-between">
+        <div style="display:flex;align-items:center;gap:.5rem">
+          <span style="color:#555;font-size:.75rem;min-width:52px;font-family:'JetBrains Mono',monospace">Raia ${raia}</span>
+          <span style="color:#e0e0e0;font-size:.85rem;font-weight:500">${escHtml(ha.athlete.nome)}</span>
+        </div>
+        <button class="btn-danger" style="padding:.2rem .4rem" onclick="removeFromHeat('${heat.id}', ${raia})" title="Remover">
+          <i data-lucide="x" style="width:12px;height:12px"></i>
+        </button>
+      </div>`;
+    } else {
+      const csId = `cs-raia-${heat.id}-${raia}`;
+      const opts = availableAthletes.map(a =>
+        `<div class="cselect-option" data-value="${a.id}" onclick="selectRaiaAthlete('${csId}','${heat.id}',${raia},this)">
+          ${escHtml(a.nome)}
+          <svg class="check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+        </div>`
+      ).join('');
+      return `<div class="raia-slot" style="gap:.4rem;overflow:visible">
+        <span style="color:#555;font-size:.75rem;min-width:52px;font-family:'JetBrains Mono',monospace">Raia ${raia}</span>
+        <div class="cselect cselect-sm" id="${csId}" style="flex:1;overflow:visible">
+          <div class="cselect-trigger" onclick="toggleSelect('${csId}')">
+            <span id="${csId}-label" class="placeholder">— atleta —</span>
+            <svg class="cselect-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="cselect-dropdown">${opts}</div>
+        </div>
+        <input type="hidden" id="sel_${heat.id}_${raia}" value="" />
+        <button class="btn-success" style="padding:.25rem .5rem" onclick="assignAthlete('${heat.id}','${raia}')">
+          <i data-lucide="plus" style="width:12px;height:12px"></i>
+        </button>
+      </div>`;
+    }
+  }).join('');
+
+  return `<div class="heat-card">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.75rem">
+      <span style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:1rem;color:#fff">${escHtml(heat.nome)}</span>
+      <span class="${statusBadge}" style="padding:.2rem .6rem;border-radius:999px;font-size:.7rem;font-weight:600">${heat.status}</span>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:.35rem">${raias}</div>
+  </div>`;
+}
+
+async function assignAthlete(heatId, raia) {
+  const sel = document.getElementById(`sel_${heatId}_${raia}`);
+  const athleteId = sel ? sel.value : '';
+
+  if (!athleteId) return;
+
+  const { error } = await sb.from('heat_athletes').insert({
+    heat_id: heatId,
+    athlete_id: athleteId,
+    raia: parseInt(raia),
+  });
+
+  if (error) {
+    showToast('Erro ao adicionar atleta: ' + error.message, 'error');
+    return;
+  }
+
+  await loadHeats();
+}
+
+async function removeFromHeat(heatId, raia) {
+  const { error } = await sb
+    .from('heat_athletes')
+    .delete()
+    .eq('heat_id', heatId)
+    .eq('raia', raia);
+
+  if (error) {
+    showToast('Erro ao remover atleta: ' + error.message, 'error');
+    return;
+  }
+
+  await loadHeats();
+}
+
+async function autoDistribute() {
+  const btn = document.getElementById('autoDistBtn');
+
+  btn.disabled = true;
+  btn.innerHTML = '<i data-lucide="loader-2" style="width:15px;height:15px;animation:spin 1s linear infinite"></i> Distribuindo...';
+  lucide.createIcons();
+
+  const confirmed = allAthletes.filter(a => a.status === 'confirmado');
+  const feminino = shuffle(confirmed.filter(a => a.genero === 'Feminino'));
+  const masculino = shuffle(confirmed.filter(a => a.genero === 'Masculino'));
+
+  const femHeats = allHeats.filter(h => h.categoria === 'Feminino').sort((a,b) => a.numero - b.numero);
+  const mascHeats = allHeats.filter(h => h.categoria === 'Masculino').sort((a,b) => a.numero - b.numero);
+
+  // Delete existing assignments first
+  const { error: delErr } = await sb.from('heat_athletes').delete().neq('id', '00000000-0000-0000-0000-000000000000');
+  if (delErr) {
+    showToast('Erro ao limpar baterias: ' + delErr.message, 'error');
+    btn.disabled = false;
+    btn.innerHTML = '<i data-lucide="shuffle" style="width:15px;height:15px"></i> Distribuir automaticamente';
+    lucide.createIcons();
+    return;
+  }
+
+  const inserts = [];
+
+  // Distribute feminino: 3 heats, 4 per heat
+  femHeats.forEach((heat, hi) => {
+    for (let raia = 1; raia <= 4; raia++) {
+      const athlete = feminino[hi * 4 + (raia - 1)];
+      if (athlete) {
+        inserts.push({ heat_id: heat.id, athlete_id: athlete.id, raia });
+      }
+    }
+  });
+
+  // Distribute masculino: 3 heats, 4 per heat
+  mascHeats.forEach((heat, hi) => {
+    for (let raia = 1; raia <= 4; raia++) {
+      const athlete = masculino[hi * 4 + (raia - 1)];
+      if (athlete) {
+        inserts.push({ heat_id: heat.id, athlete_id: athlete.id, raia });
+      }
+    }
+  });
+
+  if (inserts.length) {
+    const { error: insErr } = await sb.from('heat_athletes').insert(inserts);
+    if (insErr) {
+      showToast('Erro ao distribuir: ' + insErr.message, 'error');
+      btn.disabled = false;
+      btn.innerHTML = '<i data-lucide="shuffle" style="width:15px;height:15px"></i> Distribuir automaticamente';
+      lucide.createIcons();
+      return;
+    }
+  }
+
+  showToast(`Distribuição concluída! ${inserts.length} atletas distribuídos.`, 'success');
+
+  btn.disabled = false;
+  btn.innerHTML = '<i data-lucide="shuffle" style="width:15px;height:15px"></i> Distribuir automaticamente';
+  lucide.createIcons();
+
+  await loadHeats();
+}
+
+// ─── Tempos ───────────────────────────────────────────────────────────────
+async function loadTimesForHeat(heatId) {
+  const wrap = document.getElementById('temposTableWrap');
+  const empty = document.getElementById('temposEmpty');
+
+  currentTimesHeatId = heatId || null;
+
+  if (!heatId) {
+    wrap.classList.add('hidden');
+    empty.classList.remove('hidden');
+    return;
+  }
+
+  const { data, error } = await sb
+    .from('heat_athletes')
+    .select('*, athlete:athlete_id(id, nome)')
+    .eq('heat_id', heatId)
+    .order('raia');
+
+  if (error) {
+    showToast('Erro ao carregar atletas: ' + error.message, 'error');
+    return;
+  }
+
+  currentTimesRows = (data || []).map(ha => ({
+    ha_id: ha.id,
+    raia: ha.raia,
+    nome: ha.athlete ? ha.athlete.nome : '(atleta removido)',
+    tempo: ha.tempo || '',
+    tempo_ms: ha.tempo_ms || null,
+    posicao: ha.posicao || null,
+  }));
+
+  if (!currentTimesRows.length) {
+    document.getElementById('temposBody').innerHTML = '<tr><td colspan="4" class="px-4 py-6 text-center text-gray-600">Nenhum atleta nesta bateria.</td></tr>';
+    wrap.classList.remove('hidden');
+    empty.classList.add('hidden');
+    return;
+  }
+
+  renderTimesTable();
+  wrap.classList.remove('hidden');
+  empty.classList.add('hidden');
+}
+
+function renderTimesTable() {
+  const tbody = document.getElementById('temposBody');
+  tbody.innerHTML = currentTimesRows.map((row, i) => {
+    const posBadge = row.posicao
+      ? `<span style="padding:.2rem .6rem;border-radius:999px;font-size:.75rem;font-weight:700;${posBadgeStyle(row.posicao)}">${row.posicao}º</span>`
+      : `<span style="color:#555;font-size:.8rem">—</span>`;
+    return `<tr style="border-bottom:1px solid #141414">
+      <td class="px-4 py-3">
+        <span style="font-family:'JetBrains Mono',monospace;font-size:.9rem;color:#ff5a00">Raia ${row.raia}</span>
+      </td>
+      <td class="px-4 py-3 text-white font-medium">${escHtml(row.nome)}</td>
+      <td class="px-4 py-3">
+        <input
+          type="text"
+          class="input-base"
+          style="width:100px"
+          placeholder="12.45"
+          value="${escHtml(row.tempo)}"
+          id="tempo_${i}"
+          onchange="currentTimesRows[${i}].tempo = this.value"
+        />
+      </td>
+      <td class="px-4 py-3">${posBadge}</td>
+    </tr>`;
+  }).join('');
+  lucide.createIcons();
+}
+
+function posBadgeStyle(pos) {
+  if (pos === 1) return 'background:rgba(251,191,36,.15);color:#fbbf24;border:1px solid rgba(251,191,36,.3)';
+  if (pos === 2) return 'background:rgba(148,163,184,.15);color:#94a3b8;border:1px solid rgba(148,163,184,.3)';
+  if (pos === 3) return 'background:rgba(205,124,47,.15);color:#cd7c2f;border:1px solid rgba(205,124,47,.3)';
+  return 'background:rgba(100,100,100,.15);color:#888;border:1px solid rgba(100,100,100,.3)';
+}
+
+async function saveTimes() {
+  const btn = document.getElementById('saveTimesBtn');
+
+  if (!currentTimesHeatId) return;
+
+  // Read current input values
+  currentTimesRows.forEach((row, i) => {
+    const input = document.getElementById(`tempo_${i}`);
+    if (input) row.tempo = input.value.trim();
+  });
+
+  // Validate
+  const errors = [];
+  currentTimesRows.forEach((row, i) => {
+    if (!row.tempo) return;
+    if (!/^\d{1,3}(\.\d{1,2})?$/.test(row.tempo)) {
+      errors.push(`Raia ${row.raia}: formato inválido "${row.tempo}" (use ex: 12.45)`);
+    }
+  });
+
+  if (errors.length) {
+    showToast(errors.join('\n'), 'error');
+    return;
+  }
+
+  btn.disabled = true;
+  btn.innerHTML = '<i data-lucide="loader-2" style="width:15px;height:15px;animation:spin 1s linear infinite"></i> Salvando...';
+  lucide.createIcons();
+
+  // Convert and calculate positions
+  const rowsWithTime = currentTimesRows
+    .filter(r => r.tempo)
+    .map(r => ({ ...r, tempo_ms: Math.round(parseFloat(r.tempo) * 1000) }))
+    .sort((a, b) => a.tempo_ms - b.tempo_ms);
+
+  rowsWithTime.forEach((r, i) => {
+    r.posicao = i + 1;
+  });
+
+  // Merge back
+  const posMap = {};
+  rowsWithTime.forEach(r => { posMap[r.ha_id] = r; });
+  currentTimesRows.forEach(r => {
+    if (posMap[r.ha_id]) {
+      r.tempo_ms = posMap[r.ha_id].tempo_ms;
+      r.posicao = posMap[r.ha_id].posicao;
+    } else {
+      r.tempo_ms = null;
+      r.posicao = null;
+    }
+  });
+
+  // Upsert each row
+  let err = null;
+  for (const row of currentTimesRows) {
+    const { error } = await sb.from('heat_athletes').update({
+      tempo: row.tempo || null,
+      tempo_ms: row.tempo_ms || null,
+      posicao: row.posicao || null,
+    }).eq('id', row.ha_id);
+    if (error) { err = error; break; }
+  }
+
+  if (err) {
+    showToast('Erro ao salvar: ' + err.message, 'error');
+  } else {
+    showToast('Tempos salvos com sucesso!', 'success');
+    renderTimesTable();
+  }
+
+  btn.disabled = false;
+  btn.innerHTML = '<i data-lucide="save" style="width:15px;height:15px"></i> Salvar tempos';
+  lucide.createIcons();
+}
+
+// ─── Ranking ──────────────────────────────────────────────────────────────
+let allRankingRows = [];
+let rankingCat = 'Feminino';
+let rankingHeat = 'geral';
+
+async function loadRanking() {
+  const btn = document.getElementById('refreshRankingBtn');
+  btn.disabled = true;
+  btn.innerHTML = '<i data-lucide="loader-2" style="width:14px;height:14px;animation:spin 1s linear infinite"></i>';
+  lucide.createIcons();
+
+  const { data, error } = await sb
+    .from('heat_athletes')
+    .select('raia, tempo, tempo_ms, posicao, heat:heat_id(id, nome, categoria, numero), athlete:athlete_id(nome)')
+    .not('tempo_ms', 'is', null)
+    .order('tempo_ms', { ascending: true });
+
+  btn.disabled = false;
+  btn.innerHTML = '<i data-lucide="refresh-cw" style="width:14px;height:14px"></i>';
+  lucide.createIcons();
+
+  if (error) { showToast('Erro ao carregar ranking: ' + error.message, 'error'); return; }
+
+  // posição por categoria
+  const femRows  = (data || []).filter(r => r.heat?.categoria === 'Feminino').sort((a,b) => a.tempo_ms - b.tempo_ms);
+  const mascRows = (data || []).filter(r => r.heat?.categoria === 'Masculino').sort((a,b) => a.tempo_ms - b.tempo_ms);
+  femRows.forEach((r, i)  => r._pos = i + 1);
+  mascRows.forEach((r, i) => r._pos = i + 1);
+  allRankingRows = [...femRows, ...mascRows];
+
+  renderRanking();
+}
+
+function setRankingCat(cat, el) {
+  rankingCat = cat;
+  rankingHeat = 'geral';
+  document.querySelectorAll('[data-cat]').forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+  const s = document.getElementById('rankingSearch');
+  if (s) s.value = '';
+  renderRanking();
+}
+
+function setRankingHeat(heatId, el) {
+  rankingHeat = heatId;
+  document.querySelectorAll('[data-rh]').forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+  renderRanking();
+}
+
+function renderHeatChips(catRows) {
+  const chipsEl = document.getElementById('rankingHeatChips');
+  const heats = [...new Map(catRows.map(r => [r.heat?.id, r.heat])).values()].filter(Boolean);
+  heats.sort((a, b) => (a.numero ?? 0) - (b.numero ?? 0));
+  chipsEl.innerHTML =
+    `<button class="filter-btn ${rankingHeat==='geral'?'active':''}" data-rh="geral" onclick="setRankingHeat('geral',this)">Classificação geral</button>` +
+    heats.map(h => `<button class="filter-btn ${rankingHeat===h.id?'active':''}" data-rh="${h.id}" onclick="setRankingHeat('${h.id}',this)">${escHtml(h.nome)}</button>`).join('');
+}
+
+function renderRanking() {
+  const search  = (document.getElementById('rankingSearch')?.value || '').toLowerCase().trim();
+  const podiumEl = document.getElementById('rankingPodium');
+  const listEl   = document.getElementById('rankingList');
+  const countEl  = document.getElementById('rankingCount');
+  const titleEl  = document.getElementById('rankingListTitle');
+
+  const catRows = allRankingRows.filter(r => r.heat?.categoria === rankingCat);
+
+  // Sem nenhum tempo nesta categoria
+  if (!catRows.length) {
+    document.getElementById('rankingHeatChips').innerHTML = '';
+    podiumEl.innerHTML = '';
+    listEl.innerHTML = `<div style="padding:3rem 1rem;text-align:center;color:#444">
+      <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" style="margin:0 auto 12px;display:block;color:#333"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2 2"/><path d="M5 3 2 6"/><path d="m22 6-3-3"/></svg>
+      Nenhum tempo registrado para ${rankingCat.toLowerCase()} ainda.
+    </div>`;
+    countEl.textContent = '';
+    return;
+  }
+
+  renderHeatChips(catRows);
+
+  const isGeral = rankingHeat === 'geral';
+  // geral → posição global da categoria; bateria → posição local (1..4)
+  const viewRows = isGeral
+    ? catRows
+    : catRows.filter(r => r.heat?.id === rankingHeat).map((r, i) => ({ ...r, _pos: i + 1 }));
+
+  // Pódio: top 3 da visão atual (geral = categoria; bateria = top 3 da bateria)
+  podiumEl.innerHTML = renderPodium(viewRows.slice(0, 3));
+  titleEl.textContent = isGeral ? 'Classificação geral' : (viewRows[0]?.heat?.nome || 'Bateria');
+
+  // Lista filtrada pela busca
+  const rows = search ? viewRows.filter(r => r.athlete?.nome?.toLowerCase().includes(search)) : viewRows;
+
+  if (!rows.length) {
+    listEl.innerHTML = `<div style="padding:2rem 1rem;text-align:center;color:#666">Nenhum atleta encontrado.</div>`;
+  } else {
+    listEl.innerHTML = rows.map(r => {
+      const pos = r._pos;
+      const posInner = pos === 1 ? '🥇' : pos === 2 ? '🥈' : pos === 3 ? '🥉' : pos + 'º';
+      const posStyle = pos <= 3 ? 'background:transparent;border-color:transparent;font-size:1.1rem' : '';
+      const hl = (search && r.athlete?.nome) ? highlight(r.athlete.nome, search) : escHtml(r.athlete?.nome || '—');
+      const sub = isGeral ? `${escHtml(r.heat?.nome || '—')} · Raia ${r.raia}` : `Raia ${r.raia}`;
+      return `<div class="lb-row">
+        <div class="lb-pos" style="${posStyle}">${posInner}</div>
+        <div class="lb-name">
+          <b>${hl}</b>
+          <span>${sub}</span>
+        </div>
+        <div class="lb-time">${fmtTempo(r.tempo_ms)}</div>
+      </div>`;
+    }).join('');
+  }
+
+  countEl.textContent = `${viewRows.length} atleta${viewRows.length !== 1 ? 's' : ''}`;
+}
+
+function renderPodium(top3) {
+  if (top3.length < 3) {
+    return `<div style="display:grid;grid-template-columns:repeat(${Math.max(top3.length,1)},1fr);gap:.75rem">` +
+      top3.map(r => {
+        const medal = r._pos === 1 ? '🥇' : r._pos === 2 ? '🥈' : '🥉';
+        return `<div class="podium-card podium-${r._pos}">
+          <div class="podium-medal">${medal}</div>
+          <div class="podium-name">${escHtml(r.athlete?.nome || '—')}</div>
+          <div class="podium-sub">${escHtml(r.heat?.nome || '')} · Raia ${r.raia}</div>
+          <div class="podium-time">${fmtTempo(r.tempo_ms)}</div>
+        </div>`;
+      }).join('') + `</div>`;
+  }
+  const [first, second, third] = top3;
+  const card = (r, delay) => {
+    const medal = r._pos === 1 ? '🥇' : r._pos === 2 ? '🥈' : '🥉';
+    return `<div class="podium-card podium-${r._pos}" style="animation-delay:${delay}s">
+      <div class="podium-medal">${medal}</div>
+      <div class="podium-name">${escHtml(r.athlete?.nome || '—')}</div>
+      <div class="podium-sub">${escHtml(r.heat?.nome || '')} · Raia ${r.raia}</div>
+      <div class="podium-time">${fmtTempo(r.tempo_ms)}</div>
+    </div>`;
+  };
+  return `<div class="podium">${card(second, .05)}${card(first, 0)}${card(third, .1)}</div>`;
+}
+
+function highlight(text, term) {
+  const i = text.toLowerCase().indexOf(term);
+  if (i < 0) return escHtml(text);
+  return escHtml(text.slice(0, i)) +
+    '<mark style="background:rgba(255,90,0,.3);color:#fff;border-radius:3px;padding:0 2px">' +
+    escHtml(text.slice(i, i + term.length)) + '</mark>' +
+    escHtml(text.slice(i + term.length));
+}
+
+// ─── Tab navigation ───────────────────────────────────────────────────────
+function switchTab(name) {
+  document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+  document.querySelectorAll('.tab-btn').forEach(btn => {
+    btn.classList.remove('active');
+    btn.style.color = '';
+  });
+
+  document.getElementById('tab-' + name).classList.remove('hidden');
+
+  document.querySelectorAll('.tab-btn').forEach(btn => {
+    if (btn.getAttribute('onclick') === `switchTab('${name}')`) {
+      btn.classList.add('active');
+    } else {
+      btn.style.color = '#9ca3af';
+    }
+  });
+
+  if (name === 'baterias') {
+    document.getElementById('heats-skeleton').classList.remove('hidden');
+    document.getElementById('heats-content').classList.add('hidden');
+    loadHeats();
+  }
+  if (name === 'ranking') loadRanking();
+}
+
+// ─── Helpers ─────────────────────────────────────────────────────────────
+// ─── Custom Select ───────────────────────────────────────────────────────────
+function toggleSelect(id) {
+  const cs = document.getElementById(id);
+  if (!cs) return;
+  const isOpen = cs.classList.contains('open');
+  document.querySelectorAll('.cselect.open').forEach(s => s.classList.remove('open'));
+  if (!isOpen) cs.classList.add('open');
+}
+
+function selectHeatOption(el) {
+  selectHeat(el.dataset.value, el.dataset.label);
+}
+
+function selectHeat(value, label, silent) {
+  const cs = document.getElementById('cs-heat');
+  const lbl = document.getElementById('cs-heat-label');
+  const inp = document.getElementById('heatSelect');
+  if (!cs || !lbl || !inp) return;
+  inp.value = value;
+  lbl.textContent = label;
+  lbl.className = value ? 'selected' : 'placeholder';
+  cs.querySelectorAll('.cselect-option').forEach(o => {
+    o.classList.toggle('active', o.dataset.value === value);
+  });
+  cs.classList.remove('open');
+  if (!silent) loadTimesForHeat(value);
+}
+
+function selectRaiaAthlete(csId, heatId, raia, optionEl) {
+  const cs = document.getElementById(csId);
+  const lbl = document.getElementById(`${csId}-label`);
+  const inp = document.getElementById(`sel_${heatId}_${raia}`);
+  if (!cs || !lbl || !inp) return;
+  const value = optionEl.dataset.value;
+  const label = optionEl.textContent.trim();
+  inp.value = value;
+  lbl.textContent = label;
+  lbl.className = value ? 'selected' : 'placeholder';
+  cs.querySelectorAll('.cselect-option').forEach(o => {
+    o.classList.toggle('active', o.dataset.value === value);
+  });
+  cs.classList.remove('open');
+}
+
+// Fecha selects ao clicar fora
+document.addEventListener('click', e => {
+  if (!e.target.closest('.cselect')) {
+    document.querySelectorAll('.cselect.open').forEach(s => s.classList.remove('open'));
+  }
+});
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') {
+    document.querySelectorAll('.cselect.open').forEach(s => s.classList.remove('open'));
+  }
+});
+
+function escHtml(str) {
+  if (!str) return '';
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
+
+function fmtDate(iso) {
+  if (!iso) return '—';
+  const d = new Date(iso);
+  return d.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' });
+}
+
+function fmtTempo(ms) {
+  if (!ms && ms !== 0) return '–';
+  const total = ms / 1000;
+  const secs  = Math.floor(total);
+  const cents = Math.round((total - secs) * 100);
+  return `${secs}.${String(cents).padStart(2, '0')}s`;
+}
+
+function shuffle(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+// ─── Spin animation ───────────────────────────────────────────────────────
+const styleEl = document.createElement('style');
+styleEl.textContent = '@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }';
+document.head.appendChild(styleEl);
+
+// ─── Boot ─────────────────────────────────────────────────────────────────
+(async () => {
+  initSupabase();
+  await checkAuth();
+  lucide.createIcons();
+})();
+</script>
+<!-- ── Toast Container ── -->
+<div id="toast-container"></div>
+
+<!-- ── App Dialog ── -->
+<div id="app-dialog" class="hidden fixed inset-0 z-[9999] flex items-center justify-center p-4 modal-backdrop-anim" style="background:rgba(0,0,0,.88);backdrop-filter:blur(6px)">
+  <div class="modal-panel-anim glow-orange-soft relative w-full max-w-sm rounded-2xl p-8 flex flex-col items-center text-center gap-4" style="background:#0c0c0c;border:1px solid rgba(255,90,0,.3)">
+    <div id="app-dialog-icon"></div>
+    <h3 id="app-dialog-title" class="font-display text-3xl text-white" style="font-family:'Bebas Neue',sans-serif;letter-spacing:.05em"></h3>
+    <p id="app-dialog-text" style="color:rgba(255,255,255,.6);font-size:.875rem;line-height:1.6"></p>
+    <div id="app-dialog-footer" class="mt-2 flex gap-3"></div>
+  </div>
+</div>
+
+</body>
+</html>
