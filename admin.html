@@ -334,15 +334,10 @@
   .cselect-sm .cselect-option   { padding: 7px 10px; font-size: .8rem; }
   .cselect-sm .cselect-dropdown { border-radius: 8px; }
 
-  /* ─── Print ──────────────────────────────────────────────────── */
-  #print-ficha, #print-dorsal { display: none; }
-  @media print {
-    @page { margin: 10mm; size: A4 portrait; }
-    * { print-color-adjust: exact; -webkit-print-color-adjust: exact; }
-    body.printing-ficha > *:not(#print-ficha),
-    body.printing-dorsal > *:not(#print-dorsal) { display: none !important; }
-    body.printing-ficha  #print-ficha  { display: block !important; }
-    body.printing-dorsal #print-dorsal { display: block !important; }
+  /* ─── Print buttons mobile ───────────────────────────────────── */
+  @media (max-width: 480px) {
+    .print-btn-label { display: none; }
+    .modal-print-actions { gap: .35rem !important; }
   }
 </style>
 </head>
@@ -617,12 +612,12 @@
   <div class="modal-box" onclick="event.stopPropagation()">
     <div style="padding:1.5rem;border-bottom:1px solid #1c1c1c" class="flex items-center justify-between">
       <h2 class="font-cond text-xl font-bold text-white">Ficha do Atleta</h2>
-      <div class="flex items-center gap-2">
+      <div class="flex items-center modal-print-actions" style="gap:.5rem">
         <button onclick="printFicha()" class="btn-ghost" style="font-size:.75rem;padding:.3rem .65rem;display:inline-flex;align-items:center;gap:.3rem" title="Imprimir ficha de inscrição em PDF">
-          <i data-lucide="printer" style="width:13px;height:13px"></i> Ficha PDF
+          <i data-lucide="printer" style="width:13px;height:13px"></i><span class="print-btn-label"> Ficha PDF</span>
         </button>
         <button onclick="printDorsal()" class="btn-ghost" style="font-size:.75rem;padding:.3rem .65rem;display:inline-flex;align-items:center;gap:.3rem" title="Imprimir dorsal do corredor">
-          <i data-lucide="id-card" style="width:13px;height:13px"></i> Dorsal
+          <i data-lucide="award" style="width:13px;height:13px"></i><span class="print-btn-label"> Dorsal</span>
         </button>
         <button onclick="document.getElementById('anamneseModal').classList.add('hidden')" class="btn-ghost p-1.5">
           <i data-lucide="x" style="width:16px;height:16px"></i>
@@ -976,6 +971,30 @@ function checkIcon(val) {
     : '<span style="color:#ef4444;width:16px;height:16px;display:inline-flex">✗</span>';
 }
 
+// ─── Print helpers ────────────────────────────────────────────────────────
+function _openPrintWin(bodyHtml) {
+  const logoAbs = new URL('assets/logo-nova.png', location.href).href;
+  const html = bodyHtml.replace(/assets\/logo-nova\.png/g, logoAbs);
+  const win = window.open('', '_blank');
+  if (!win) { showToast('Ative pop-ups no navegador para imprimir.', 'error'); return; }
+  win.document.write(`<!DOCTYPE html><html lang="pt-BR"><head>
+    <meta charset="UTF-8"/>
+    <style>
+      @page { margin: 10mm; size: A4 portrait; }
+      body { margin: 0; padding: 0; background: #fff; font-family: Arial, Helvetica, sans-serif; }
+      * { print-color-adjust: exact; -webkit-print-color-adjust: exact; }
+    </style>
+  </head><body>${html}<script>
+    window.addEventListener('load', function() {
+      setTimeout(function() {
+        window.print();
+        window.addEventListener('afterprint', function() { window.close(); });
+      }, 200);
+    });
+  <\/script></body></html>`);
+  win.document.close();
+}
+
 // ─── Print: Ficha de Inscrição ────────────────────────────────────────────
 function printFicha() {
   const a = currentPrintAthlete;
@@ -996,8 +1015,8 @@ function printFicha() {
   const statusColor = a.status === 'confirmado' ? '#16a34a' : a.status === 'cancelado' ? '#dc2626' : '#d97706';
   const today = new Date().toLocaleDateString('pt-BR', { day: '2-digit', month: 'long', year: 'numeric' });
 
-  document.getElementById('print-ficha').innerHTML = `
-    <div style="font-family:Arial,Helvetica,sans-serif;max-width:680px;margin:0 auto;color:#111;background:#fff">
+  _openPrintWin(`
+    <div style="max-width:680px;margin:0 auto;color:#111;background:#fff">
       <div style="display:flex;align-items:center;justify-content:space-between;border-bottom:3px solid #ff5a00;padding-bottom:10px;margin-bottom:18px">
         <img src="assets/logo-nova.png" alt="Ritmo Forte" style="height:48px;object-fit:contain" />
         <div style="text-align:right">
@@ -1065,11 +1084,7 @@ function printFicha() {
         Ritmo Forte · Ficha gerada automaticamente em ${today}
       </div>
     </div>
-  `;
-
-  document.body.classList.add('printing-ficha');
-  window.print();
-  document.body.classList.remove('printing-ficha');
+  `);
 }
 
 // ─── Print: Dorsal do Corredor ────────────────────────────────────────────
@@ -1079,15 +1094,15 @@ function printDorsal() {
 
   const regNum = String(allAthletes.findIndex(x => x.id === a.id) + 1).padStart(3, '0');
 
-  document.getElementById('print-dorsal').innerHTML = `
-    <div style="font-family:Arial,Helvetica,sans-serif;width:160mm;margin:0 auto;border:2px solid #ff5a00;overflow:hidden;background:#fff">
+  _openPrintWin(`
+    <div style="width:160mm;margin:0 auto;border:2px solid #ff5a00;overflow:hidden;background:#fff">
       <div style="background:#ff5a00;padding:12px 20px;display:flex;align-items:center;justify-content:space-between">
         <img src="assets/logo-nova.png" alt="Ritmo Forte" style="height:40px;object-fit:contain;filter:brightness(0) invert(1)" />
         <div style="color:#fff;font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;text-align:right">FICHA DO CORREDOR</div>
       </div>
 
       <div style="text-align:center;padding:28px 20px 8px;background:#fff">
-        <div style="font-size:130px;font-weight:900;line-height:1;color:#111;letter-spacing:-.02em;font-family:Arial Black,Arial,sans-serif">${regNum}</div>
+        <div style="font-size:130px;font-weight:900;line-height:1;color:#111;letter-spacing:-.02em;font-family:'Arial Black',Arial,sans-serif">${regNum}</div>
       </div>
 
       <div style="text-align:center;padding:10px 20px 20px;border-top:1px solid #f3f4f6">
@@ -1097,15 +1112,11 @@ function printDorsal() {
       </div>
 
       <div style="background:#111;padding:7px 20px;display:flex;justify-content:space-between;align-items:center">
-        <div style="color:rgba(255,255,255,.45);font-size:8px;letter-spacing:.1em;text-transform:uppercase">ritmoforte.com.br</div>
+        <div style="color:rgba(255,255,255,.45);font-size:8px;letter-spacing:.1em;text-transform:uppercase">Ritmo Forte</div>
         <div style="color:rgba(255,255,255,.45);font-size:8px">Nº ${regNum}</div>
       </div>
     </div>
-  `;
-
-  document.body.classList.add('printing-dorsal');
-  window.print();
-  document.body.classList.remove('printing-dorsal');
+  `);
 }
 
 // ─── Baterias ─────────────────────────────────────────────────────────────
@@ -1772,12 +1783,6 @@ document.head.appendChild(styleEl);
   lucide.createIcons();
 })();
 </script>
-<!-- ── Print: Ficha de Inscrição ── -->
-<div id="print-ficha"></div>
-
-<!-- ── Print: Dorsal do Corredor ── -->
-<div id="print-dorsal"></div>
-
 <!-- ── Toast Container ── -->
 <div id="toast-container"></div>
 
